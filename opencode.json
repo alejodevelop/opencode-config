@@ -1,0 +1,162 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "context7": {
+      "enabled": true,
+      "headers": {
+        "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
+      },
+      "oauth": false,
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "plane-ottcomputer": {
+      "enabled": true,
+      "type": "remote",
+      "url": "https://mcp.plane.so/http/mcp"
+    },
+    "stitch": {
+      "command": [
+        "npx",
+        "-y",
+        "@_davideast/stitch-mcp",
+        "proxy"
+      ],
+      "enabled": true,
+      "environment": {
+        "STITCH_API_KEY": "{env:STITCH_API_KEY}"
+      },
+      "type": "local"
+    },
+    "playwright": {
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp"
+      ],
+      "enabled": true,
+      "type": "local"
+    },
+    "plane-erp-secret-project": {
+      "type": "remote",
+      "url": "https://mcp.plane.so/http/mcp"
+    }
+  },
+  "permission": {
+    "bash": {
+      "*": "allow",
+      "git commit *": "ask",
+      "git push": "ask",
+      "git push *": "ask",
+      "git push --force *": "ask",
+      "git rebase *": "ask",
+      "git reset --hard *": "ask"
+    },
+    "read": {
+      "*": "allow",
+      "**/.env": "deny",
+      "**/.env.*": "deny",
+      "**/credentials.json": "deny",
+      "**/secrets/**": "deny",
+      "*.env": "deny",
+      "*.env.*": "deny"
+    }
+  },
+  "provider": {
+    "9router": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://127.0.0.1:20128/v1",
+        "apiKey": "{env:NINEROUTER_API_KEY}"
+      },
+      "models": {
+        "cx/gpt-5.6-sol": {
+          "name": "cx/gpt-5.6-sol",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "ocg/deepseek-flash": {
+          "name": "ocg/deepseek-flash",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "ocg/muse-spark-1.3-contributor": {
+          "name": "ocg/muse-spark-1.3-contributor",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "model": "9router/cx/gpt-5.6-sol",
+  "agent": {
+    "build": {
+      "model": "9router/cx/gpt-5.6-sol",
+      "prompt": "You are the primary orchestrator. Own the conversation, reasoning, planning, architecture, review, and OpenSpec artifacts. Never implement or modify application code yourself. Delegate every implementation, test run, formatter, migration, and implementation fix to the general subagent. Give it exact scope, relevant OpenSpec paths, acceptance criteria, constraints, and verification commands. Review its result; delegate corrections instead of editing code yourself. You may directly edit only OpenSpec artifacts.",
+      "permission": {
+        "edit": {
+          "*": "deny",
+          "openspec/**": "allow",
+          "**/openspec/**": "allow"
+        },
+        "bash": "deny",
+        "task": {
+          "*": "allow"
+        }
+      }
+    },
+    "plan": {
+      "model": "9router/cx/gpt-5.6-sol",
+      "prompt": "You are the primary orchestrator. Own the conversation, reasoning, planning, architecture, review, and OpenSpec artifacts. Never implement or modify application code yourself. Delegate every implementation, test run, formatter, migration, and implementation fix to the general subagent. Give it exact scope, relevant OpenSpec paths, acceptance criteria, constraints, and verification commands. Review its result; delegate corrections instead of editing code yourself. You may directly edit only OpenSpec artifacts.",
+      "permission": {
+        "edit": {
+          "*": "deny",
+          "openspec/**": "allow",
+          "**/openspec/**": "allow"
+        },
+        "bash": "deny",
+        "task": {
+          "*": "allow"
+        }
+      }
+    },
+    "general": {
+      "description": "Implements planned code changes, runs tests, and reports concise verified results",
+      "mode": "subagent",
+      "model": "9router/ocg/muse-spark-1.3-contributor",
+      "prompt": "You are the implementation executor. Follow the caller's plan and referenced OpenSpec artifacts. Inspect only the context needed, implement the requested code, run the specified tests and relevant focused checks, fix failures within scope, then return a concise summary with changed files, verification results, and blockers. Do not redesign the plan, expand scope, create OpenSpec artifacts, commit, push, or delegate to other agents.",
+      "permission": {
+        "task": "deny"
+      }
+    },
+    "explore": {
+      "model": "9router/ocg/muse-spark-1.3-contributor"
+    },
+    "explorer": {
+      "description": "Fast explorer subagent for codebase exploration",
+      "mode": "subagent",
+      "model": "9router/ocg/muse-spark-1.3-contributor"
+    }
+  }
+}

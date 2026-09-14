@@ -1,0 +1,46 @@
+# Dependencias y artefactos generados
+node_modules/
+bun.lock
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Logs y salida de herramientas
+*.log
+logs/
+tool-output/
+.opencode-output/
+
+# Estado, caches, sesiones y auth (nunca versionar)
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite
+*.sqlite-*
+*.wal
+*.shm
+auth.json
+account.json
+mcp-auth/
+credentials.json
+secrets/
+storage/
+snapshot/
+delegations/
+repos/
+.cache/
+.opencode/
+opencode.db*
+
+# Binarios y temporales del SO/editor
+*.exe
+*.msi
+*.dmg
+*.pkg
+Thumbs.db
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
