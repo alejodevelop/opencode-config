@@ -48,6 +48,28 @@ opencode debug config
 # Reinicia OpenCode
 ```
 
+## Instalación en PC nuevo (bootstrap sin git clone)
+
+Instalador público: <https://github.com/alejodevelop/opencode-bootstrap>.
+Descarga el snapshot de este repo **privado** con `gh api` autenticado
+(sin `git clone`, sin `.git`). Requiere `gh auth login` con acceso aquí.
+
+```powershell
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/alejodevelop/opencode-bootstrap/main/install.ps1 -OutFile install-opencode.ps1
+# Revisa el archivo y luego:
+powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1
+```
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/alejodevelop/opencode-bootstrap/main/install.sh -o install-opencode.sh
+# Revisa el archivo y luego:
+bash install-opencode.sh
+source ~/.config/opencode-bootstrap/env.sh
+```
+
+Detalles (actualización con `-Force`/`--force`, rollback, desinstalación):
+ver README del repo bootstrap.
+
 ## Notas
 
 - `OPENCODE_CONFIG` debe apuntar a `<checkout>/opencode.json`; `OPENCODE_CONFIG_DIR` a `<checkout>`.
