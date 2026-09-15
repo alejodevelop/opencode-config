@@ -1,76 +1,34 @@
 # opencode-config
 
-Copia portable de la configuración declarativa de OpenCode. Sin secretos, sin estado, sin cachés.
+Copia de referencia de la configuracion de OpenCode.
 
-## Arquitectura
+**Este repo NO se carga automaticamente.** La fuente de verdad es
+~/.config/opencode/opencode.json (la instalacion global en cada PC).
 
-- `opencode.json`: configuración principal. Credenciales solo como `{env:NOMBRE}`.
-- `agents/`: subagentes (`memory-curator`, `memory-recall`).
-- `commands/`: comandos (`sync-memory`, `remember-feature`, `recall-feature`, `review-memory`).
-- `skills/`: skills externas para que `OPENCODE_CONFIG_DIR` las descubra.
-- `opencode-memory-kit/scripts/`: `bootstrap-project` y `doctor` (`.ps1`/`.sh`).
-- `opencode-memory-kit/templates/`: plantillas de `docs/ai-memory` y bloque `AGENTS.md`.
-- `package.json`: fija `@opencode-ai/plugin` (requerido por la config portada).
-- `.env.example`: nombres de variables secretas, sin valores.
-- `scripts/check-portable.ps1`: chequeo de portabilidad (sin dependencias nuevas).
+## Contenido
 
-Variables secretas requeridas (solo nombres): `CONTEXT7_API_KEY`, `STITCH_API_KEY`, `NINEROUTER_API_KEY`.
+| Archivo / directorio | Que es |
+|---|---|
+| opencode.global.json | Snapshot sanitizado de la config global (secretos como {env:...}) |
+| .env.example | Variables de entorno requeridas (nombres, sin valores) |
+| agents/ | Subagentes (memory-curator, memory-recall) |
+| commands/ | Comandos (sync-memory, remember-feature, recall-feature, review-memory) |
+| skills/ | Skills reutilizables |
+| opencode-memory-kit/ | Scripts y plantillas del kit de memoria |
 
-Requisitos locales: Node + `npx` (servidores MCP `stitch`, `playwright`); endpoints `http://127.0.0.1:20128/v1` (provider local) y `https://mcp.plane.so/http/mcp`, `https://mcp.context7.com/mcp` (remotos).
+## Configurar otra PC
 
-## Backup / update
+1. Copia opencode.global.json como ~/.config/opencode/opencode.json
+2. Define las variables de .env.example en tu entorno
+3. opencode auth login + opencode mcp auth
+4. opencode debug config para verificar
+5. Abre OpenCode
 
-Desde la máquina de origen, copiar solo lo declarativo (`opencode.json`, `agents/`, `commands/`, `opencode-memory-kit/scripts`, `opencode-memory-kit/templates`, `skills/`, `package.json` si aplica). Nunca copiar `node_modules`, locks no versionados, `install-manifest.tsv`, manifiestos de skills, cachés, DB (`*.db*`), logs, auth (`auth.json`, `mcp-auth/`), `.env*` con valores, sesiones ni estado.
+Copia los commands/, agents/, skills/ y opencode-memory-kit/
+que necesites a ~/.config/opencode/ (o a ~/.agents/skills/ para skills).
 
-## Restauración Windows (PowerShell)
+## Reglas
 
-```powershell
-git clone <repo-url> C:\ruta\opencode-config
-$env:OPENCODE_CONFIG = "C:\ruta\opencode-config\opencode.json"
-$env:OPENCODE_CONFIG_DIR = "C:\ruta\opencode-config"
-# Define CONTEXT7_API_KEY, STITCH_API_KEY, NINEROUTER_API_KEY en tu entorno
-opencode auth login
-opencode mcp auth
-opencode debug config
-# Reinicia OpenCode
-```
-
-## Restauración Linux / macOS / WSL
-
-```sh
-git clone <repo-url> ~/opencode-config
-export OPENCODE_CONFIG="$HOME/opencode-config/opencode.json"
-export OPENCODE_CONFIG_DIR="$HOME/opencode-config"
-# Define CONTEXT7_API_KEY, STITCH_API_KEY, NINEROUTER_API_KEY en tu entorno
-opencode auth login
-opencode mcp auth
-opencode debug config
-# Reinicia OpenCode
-```
-
-## Instalación en PC nuevo (bootstrap sin git clone)
-
-Instalador público: <https://github.com/alejodevelop/opencode-bootstrap>.
-Descarga el snapshot de este repo **privado** con `gh api` autenticado
-(sin `git clone`, sin `.git`). Requiere `gh auth login` con acceso aquí.
-
-```powershell
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/alejodevelop/opencode-bootstrap/main/install.ps1 -OutFile install-opencode.ps1
-# Revisa el archivo y luego:
-powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1
-```
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/alejodevelop/opencode-bootstrap/main/install.sh -o install-opencode.sh
-# Revisa el archivo y luego:
-bash install-opencode.sh
-source ~/.config/opencode-bootstrap/env.sh
-```
-
-Detalles (actualización con `-Force`/`--force`, rollback, desinstalación):
-ver README del repo bootstrap.
-
-## Notas
-
-- `OPENCODE_CONFIG` debe apuntar a `<checkout>/opencode.json`; `OPENCODE_CONFIG_DIR` a `<checkout>`.
-- Las sesiones no se incluyen; exportarlas aparte con `opencode export --sanitize` cuando aplique.
+- NUNCA apuntar OPENCODE_CONFIG / OPENCODE_CONFIG_DIR a este repo
+- NUNCA versionar secretos
+- Para actualizar: copia tu global actual a opencode.global.json, reemplaza secretos por placeholders
