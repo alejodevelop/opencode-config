@@ -1,19 +1,44 @@
+# --- Credenciales y estado de autenticación (NUNCA versionar) ---
 .env
 .env.*
-!.env.example
 auth.json
 account.json
 credentials.json
+service.json
 secrets/
 mcp-auth/
+
+# --- Material de claves privadas ---
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*.token
+
+# --- Backups y snapshots ---
+*.bak
+*.backup
+snapshot/
+backups/
+
+# --- Bases de datos y estado ---
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.wal
+*.shm
+
+# --- Logs y cachés ---
+logs/
+*.log
+.cache/
+.opencode/
+
+# --- Dependencias ---
 node_modules/
 bun.lock
 package-lock.json
-*.db
-*.sqlite
-*.wal
-*.shm
-.cache/
-.opencode/
-logs/
-snapshot/

@@ -1,162 +1,108 @@
+
 {
   "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "context7": {
-      "enabled": true,
-      "headers": {
-        "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
-      },
-      "oauth": false,
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp"
+  "model": "omniroute/cx/gpt-5.6-sol",
+  "default_agent": "build",
+  "agents": {
+    "build": {
+      "mode": "primary",
+      "model": "omniroute/cx/gpt-5.6-sol",
+      "system": "You are the primary agent and own the conversation, reasoning, architecture, implementation, and final delivery. Directly implement small, medium, localized, reversible changes and run safe focused checks yourself. Delegate to general only broad or complex implementations, migrations, or multi-file work that would consume too much context. Give it a concrete scope, constraints, acceptance criteria, and expected checks. Use explore for read-only investigations best kept separate from your main context. For each delegated implementation, use a single general child session and reuse its sessionID for at most one correction round; then stop and report results and remaining blockers. Freeze all edits before review; never review concurrently with edits. Invoke reviewer only for high-risk, broad, security, authentication, data migration, concurrency, public API, or multi-subsystem changes, or when explicitly requested. Triage every finding and resolve or delegate corrections within the previous limits; clearly disclose unresolved issues. Never commit or push without an explicit user request.",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "allow" },
+        { "action": "subagent", "resource": "*", "effect": "deny" },
+        { "action": "subagent", "resource": "general", "effect": "allow" },
+        { "action": "subagent", "resource": "explore", "effect": "allow" },
+        { "action": "subagent", "resource": "reviewer", "effect": "allow" }
+      ]
     },
-    "plane-ottcomputer": {
-      "enabled": true,
-      "type": "remote",
-      "url": "https://mcp.plane.so/http/mcp"
+    "plan": {
+      "mode": "primary",
+      "model": "omniroute/cx/gpt-5.6-sol",
+      "system": "You are a research and planning agent. Investigate code, clarify requirements, and design solutions without implementing them. Never modify code or configuration files, and never run tests, formatters, migrations, or implementation fixes. Delegate read-only investigations only to explore. Present the plan directly in the conversation, including scope, affected files or components, implementation steps, constraints, acceptance criteria, and verification commands for build to execute. Identify open questions and pending decisions instead of silently turning them into assumptions. Do not create or update planning files unless explicitly requested by the user and permitted by the built-in Plan mode restrictions. If asked to implement, tell the user to switch to build.",
+      "permissions": [
+        { "action": "shell", "resource": "*", "effect": "deny" },
+        { "action": "subagent", "resource": "*", "effect": "deny" },
+        { "action": "subagent", "resource": "explore", "effect": "allow" }
+      ]
     },
-    "stitch": {
-      "command": [
-        "npx",
-        "-y",
-        "@_davideast/stitch-mcp",
-        "proxy"
-      ],
-      "enabled": true,
-      "environment": {
-        "STITCH_API_KEY": "{env:STITCH_API_KEY}"
-      },
-      "type": "local"
+    "general": {
+      "description": "Implements delegated plans, runs focused checks, and reports verified results and blockers",
+      "mode": "subagent",
+      "model": "omniroute/opencode-go/deepseek-flash",
+      "system": "You are the implementation executor. Follow the caller's plan, scope, and constraints. Inspect only the context needed, implement the requested changes, and run the specified tests and relevant focused checks. Fix failures within scope. If a problem requires expanding scope or changing the design, report it to the caller instead of resolving it independently. Do not redesign the plan, expand scope, commit, push, or delegate to other agents. Return a concise summary of changed files, changes made, checks performed and their results, and any remaining blockers or risks. Clearly distinguish verified results from anything you could not verify.",
+      "permissions": [
+        { "action": "subagent", "resource": "*", "effect": "deny" }
+      ]
     },
-    "playwright": {
-      "command": [
-        "npx",
-        "-y",
-        "@playwright/mcp"
-      ],
-      "enabled": true,
-      "type": "local"
+    "explore": {
+      "model": "omniroute/opencode-go/deepseek-flash"
     },
-    "plane-erp-secret-project": {
-      "type": "remote",
-      "url": "https://mcp.plane.so/http/mcp"
+    "reviewer": {
+      "description": "Independently reviews frozen changes for evidence-based defects without editing or running commands",
+      "mode": "subagent",
+      "model": "omniroute/cx/gpt-5.6-sol",
+      "system": "You are an independent, read-only code reviewer. Review only the frozen changes, revision, and evidence provided by the caller. Read the context needed to verify findings without expanding the review beyond its scope. Report only verifiable problems, explain their impact, and cite exact path:line references. Distinguish defects from style preferences. Do not edit files, delegate to other agents, create todos, run tests, or execute shell commands. If no findings survive verification, report no findings; never invent issues to justify the review.",
+      "permissions": [
+        { "action": "*", "resource": "*", "effect": "deny" },
+        { "action": "read", "resource": "*", "effect": "allow" },
+        { "action": "read", "resource": "*.env", "effect": "deny" },
+        { "action": "read", "resource": "**/.env", "effect": "deny" },
+        { "action": "read", "resource": "*.env.*", "effect": "deny" },
+        { "action": "read", "resource": "**/.env.*", "effect": "deny" },
+        { "action": "glob", "resource": "*", "effect": "allow" },
+        { "action": "grep", "resource": "*", "effect": "allow" },
+        { "action": "list", "resource": "*", "effect": "allow" },
+        { "action": "external_directory", "resource": "*", "effect": "allow" },
+        { "action": "skill", "resource": "*", "effect": "allow" }
+      ]
+    },
+    "title": {
+      "model": "omniroute/opencode-go/deepseek-flash"
     }
   },
-  "permission": {
-    "bash": {
-      "*": "allow",
-      "git commit *": "ask",
-      "git push": "ask",
-      "git push *": "ask",
-      "git push --force *": "ask",
-      "git rebase *": "ask",
-      "git reset --hard *": "ask"
-    },
-    "read": {
-      "*": "allow",
-      "**/.env": "deny",
-      "**/.env.*": "deny",
-      "**/credentials.json": "deny",
-      "**/secrets/**": "deny",
-      "*.env": "deny",
-      "*.env.*": "deny"
-    }
-  },
-  "provider": {
-    "9router": {
-      "npm": "@ai-sdk/openai-compatible",
-      "options": {
-        "baseURL": "http://127.0.0.1:20128/v1",
-        "apiKey": "{env:NINEROUTER_API_KEY}"
+  "providers": {
+    "omniroute": {
+      "name": "OmniRoute Local",
+      "package": "@opencode/ai/providers/openai-compatible",
+      "settings": {
+        "baseURL": "http://127.0.0.1:20131/v1",
+        "apiKey": "{file:~/.config/opencode/omniroute.key}"
       },
       "models": {
         "cx/gpt-5.6-sol": {
-          "name": "cx/gpt-5.6-sol",
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
+          "name": "GPT 5.6 Sol (OmniRoute)",
+          "capabilities": {
+            "tools": true,
+            "input": ["text", "image"],
+            "output": ["text"],
+            "reasoning": { "supported": true }
+          },
+          "limit": { "context": 872000, "output": 128000 }
         },
-        "ocg/deepseek-flash": {
-          "name": "ocg/deepseek-flash",
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "ocg/muse-spark-1.3-contributor": {
-          "name": "ocg/muse-spark-1.3-contributor",
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
+        "opencode-go/deepseek-flash": {
+          "name": "DeepSeek Flash (OmniRoute)",
+          "capabilities": {
+            "tools": true,
+            "input": ["text"],
+            "output": ["text"],
+            "reasoning": { "supported": true }
+          },
+          "limit": { "context": 1000000, "output": 384000 }
         }
       }
     }
   },
-  "model": "9router/cx/gpt-5.6-sol",
-  "agent": {
-    "build": {
-      "model": "9router/cx/gpt-5.6-sol",
-      "prompt": "You are the primary orchestrator. Own the conversation, reasoning, planning, architecture, review, and OpenSpec artifacts. Never implement or modify application code yourself. Delegate every implementation, test run, formatter, migration, and implementation fix to the general subagent. Give it exact scope, relevant OpenSpec paths, acceptance criteria, constraints, and verification commands. Review its result; delegate corrections instead of editing code yourself. You may directly edit only OpenSpec artifacts.",
-      "permission": {
-        "edit": {
-          "*": "deny",
-          "openspec/**": "allow",
-          "**/openspec/**": "allow"
-        },
-        "bash": "deny",
-        "task": {
-          "*": "allow"
-        }
+  "mcp": {
+    "servers": {
+      "plane": {
+        "type": "remote",
+        "url": "https://mcp.plane.so/http/mcp"
+      },
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp/oauth"
       }
-    },
-    "plan": {
-      "model": "9router/cx/gpt-5.6-sol",
-      "prompt": "You are the primary orchestrator. Own the conversation, reasoning, planning, architecture, review, and OpenSpec artifacts. Never implement or modify application code yourself. Delegate every implementation, test run, formatter, migration, and implementation fix to the general subagent. Give it exact scope, relevant OpenSpec paths, acceptance criteria, constraints, and verification commands. Review its result; delegate corrections instead of editing code yourself. You may directly edit only OpenSpec artifacts.",
-      "permission": {
-        "edit": {
-          "*": "deny",
-          "openspec/**": "allow",
-          "**/openspec/**": "allow"
-        },
-        "bash": "deny",
-        "task": {
-          "*": "allow"
-        }
-      }
-    },
-    "general": {
-      "description": "Implements planned code changes, runs tests, and reports concise verified results",
-      "mode": "subagent",
-      "model": "9router/ocg/muse-spark-1.3-contributor",
-      "prompt": "You are the implementation executor. Follow the caller's plan and referenced OpenSpec artifacts. Inspect only the context needed, implement the requested code, run the specified tests and relevant focused checks, fix failures within scope, then return a concise summary with changed files, verification results, and blockers. Do not redesign the plan, expand scope, create OpenSpec artifacts, commit, push, or delegate to other agents.",
-      "permission": {
-        "task": "deny"
-      }
-    },
-    "explore": {
-      "model": "9router/ocg/muse-spark-1.3-contributor"
-    },
-    "explorer": {
-      "description": "Fast explorer subagent for codebase exploration",
-      "mode": "subagent",
-      "model": "9router/ocg/muse-spark-1.3-contributor"
     }
   }
 }

@@ -1,34 +1,117 @@
 # opencode-config
 
-Copia de referencia de la configuracion de OpenCode.
+Snapshot **portable y sanitizado** de mi configuración global de OpenCode (V2).
+Sirve como copia de referencia para reconstruir el entorno en otra máquina.
 
-**Este repo NO se carga automaticamente.** La fuente de verdad es
-~/.config/opencode/opencode.json (la instalacion global en cada PC).
+**Este repositorio NO se carga automáticamente.** La fuente de verdad es la
+instalación global de cada máquina:
+
+- `~/.config/opencode/opencode.json` — configuración global.
+- `~/.agents/skills/` — skills instaladas para los agentes.
+
+Este repo es una copia de solo lectura pensada para revisión e instalación
+manual. No lo apuntes con `OPENCODE_CONFIG` ni `OPENCODE_CONFIG_DIR`.
 
 ## Contenido
 
-| Archivo / directorio | Que es |
+| Archivo / directorio | Qué es |
 |---|---|
-| opencode.global.json | Snapshot sanitizado de la config global (secretos como {env:...}) |
-| .env.example | Variables de entorno requeridas (nombres, sin valores) |
-| agents/ | Subagentes (memory-curator, memory-recall) |
-| commands/ | Comandos (sync-memory, remember-feature, recall-feature, review-memory) |
-| skills/ | Skills reutilizables |
-| opencode-memory-kit/ | Scripts y plantillas del kit de memoria |
+| `opencode.global.json` | Snapshot sanitizado de `~/.config/opencode/opencode.json` |
+| `skills/agent-browser/SKILL.md` | Automatización de navegador para agentes |
+| `skills/code-review-and-quality/SKILL.md` | Revisión de código multi-eje antes de mergear |
+| `skills/find-skills/SKILL.md` | Descubrir e instalar skills |
+| `skills/git-workflow-and-versioning/SKILL.md` | Flujo Git, commits, PRs, releases |
+| `skills/plane-work-management/SKILL.md` | Gestión de proyectos y work items en Plane |
+| `skills/plane-workitem-development/SKILL.md` | Desarrollo de un work item de Plane de punta a punta |
 
-## Configurar otra PC
+Total: 6 skills. Los agentes viven dentro de `opencode.global.json` (no hay
+carpeta `agents/` ni `commands/` en este snapshot).
 
-1. Copia opencode.global.json como ~/.config/opencode/opencode.json
-2. Define las variables de .env.example en tu entorno
-3. opencode auth login + opencode mcp auth
-4. opencode debug config para verificar
-5. Abre OpenCode
+## Configuración V2 (`opencode.global.json`)
 
-Copia los commands/, agents/, skills/ y opencode-memory-kit/
-que necesites a ~/.config/opencode/ (o a ~/.agents/skills/ para skills).
+Es un snapshot fiel de `~/.config/opencode/opencode.json`. Contiene:
+
+- `$schema`: `https://opencode.ai/config.json`.
+- `model` por defecto y `default_agent: "build"`.
+- **Agentes** (`agents`):
+  - `build` (primary) — orquesta, implementa cambios pequeños y **es el único
+    que muta Plane y Git**.
+  - `plan` (primary) — investigación y diseño, sin editar código ni ejecutar shell.
+  - `general` (subagent) — ejecutor de implementaciones delegadas.
+  - `explore` (subagent) — exploración de solo lectura.
+  - `reviewer` (subagent) — revisión **estrictamente de solo lectura**.
+  - `title` — generación de títulos.
+- **Proveedor** (`providers.omniroute`): endpoint local
+  `http://127.0.0.1:20131/v1`, con la credencial referenciada como
+  `{file:~/.config/opencode/omniroute.key}`. **Nunca se copia el valor de la
+  clave.**
+- **Modelos** declarados: `cx/gpt-5.6-sol` y `opencode-go/deepseek-flash`.
+- **MCP** (`mcp.servers`): dos servidores remotos por OAuth:
+  - `plane` → `https://mcp.plane.so/http/mcp`
+  - `context7` → `https://mcp.context7.com/mcp/oauth`
+
+El archivo solo referencia credenciales; no contiene tokens, estado OAuth ni
+secretos.
+
+## Requisitos previos
+
+- OpenCode V2 instalado (`opencode --version`).
+- Un endpoint compatible con OpenAI accesible en la URL configurada
+  (`http://127.0.0.1:20131/v1` en este snapshot). Ajusta `providers.omniroute`
+  si tu endpoint es distinto.
+- Acceso de red a los servidores MCP de Plane y Context7.
+
+## Instalación segura en otra máquina
+
+1. Instala OpenCode V2.
+2. Copia el snapshot a la ruta global:
+   ```bash
+   mkdir -p ~/.config/opencode
+   cp opencode.global.json ~/.config/opencode/opencode.json
+   ```
+3. Crea el archivo de credencial **sin exponer el valor** en el historial de
+   shell ni en el repositorio. Por ejemplo, escríbelo con un editor y permisos
+   restringidos:
+   ```bash
+   install -m 600 /dev/null ~/.config/opencode/omniroute.key
+   # edita el archivo y pega la clave como única línea, sin comillas
+   ```
+   La clave vive **solo** en `~/.config/opencode/omniroute.key`; nunca en este
+   repo.
+4. Copia las skills que quieras a la ruta global de skills:
+   ```bash
+   mkdir -p ~/.agents/skills
+   cp -r skills/<nombre> ~/.agents/skills/
+   ```
+5. Autentica los servidores MCP remotos por OAuth (abre el navegador):
+   ```bash
+   opencode mcp auth plane
+   opencode mcp auth context7
+   ```
+6. Verifica la instalación:
+   ```bash
+   opencode mcp list          # debe mostrar plane y context7 como connected
+   opencode debug config      # muestra las fuentes de configuración
+   opencode debug agents      # lista los agentes cargados
+   ```
+
+## Exclusiones explícitas (no copiar)
+
+Este snapshot es deliberadamente parcial. **Nunca** copies ni versiones:
+
+- Credenciales y estado OAuth: `auth.json`, `account.json`,
+  `credentials.json`, `~/.local/share/opencode/`, tokens de MCP.
+- `service.json` y cualquier secreto de servicio.
+- Backups (`*.bak`, `snapshot/`).
+- Bases de datos (`opencode.db`, `*.sqlite`, `*.db-wal`/`-shm`), logs y cachés.
+- El valor de `omniroute.key` y cualquier clave privada o material criptográfico.
+
+La instalación global de cada máquina sigue siendo la fuente de verdad; este
+repo es solo una copia de referencia sanitizada.
 
 ## Reglas
 
-- NUNCA apuntar OPENCODE_CONFIG / OPENCODE_CONFIG_DIR a este repo
-- NUNCA versionar secretos
-- Para actualizar: copia tu global actual a opencode.global.json, reemplaza secretos por placeholders
+- NUNCA apuntar `OPENCODE_CONFIG` / `OPENCODE_CONFIG_DIR` a este repo.
+- NUNCA versionar secretos: solo referencias como `{file:...}`.
+- Para actualizar: copia tu `~/.config/opencode/opencode.json` a
+  `opencode.global.json` y verifica que no haya quedado ningún valor sensible.

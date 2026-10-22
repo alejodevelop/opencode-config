@@ -7,14 +7,68 @@ description: Manage Plane projects, work items, epics, cycles, modules, states, 
 
 Use the available Plane MCP tools for all Plane reads and writes.
 
+## Ownership And Mutation Authority
+
+- The primary `build` agent owns every Plane mutation. It is the only agent authorized to create, update, transition, link, comment on, or delete Plane data.
+- Subagents do not synchronize Plane independently. `general` and `explore` may read Plane and must report the evidence, identifiers, and recommended changes back to `build`; they must not call mutating Plane tools.
+- `reviewer` is strictly read-only and cannot call Plane tools. It verifies the frozen Plane evidence supplied by `build` and reports findings; it never reads from or writes to Plane directly.
+- When a subagent is asked to change Plane, it returns the intended change plus its evidence to `build`, which applies it.
+
+## Advisory Versus Execution Mode
+
+Classify the request before acting:
+
+- Advisory (read-only) mode: the user asks for analysis, explanation, a plan, options, a review, or a recommendation. Perform only reads. Do not create, update, transition, comment on, link, or delete anything, even when the change looks obvious. Present findings and a proposed change set.
+- Execution mode: the user explicitly asks to create, update, transition, organize, or complete Plane work. Apply the Safe Workflow below.
+
+If intent is ambiguous, default to advisory and ask one focused question before any write.
+
 ## Policy Resolution
 
 Before changing Plane data:
 
-1. Find the current Git worktree root.
-2. Read `AGENTS.md` and nested agent-instruction files when present.
-3. Apply this skill as the default workflow. Apply explicit repository instructions as overrides for project selection, naming, states, modules, required metadata, validation commands, and Definition of Done.
+1. Apply this skill as the default workflow.
+2. When the work is tied to a repository, find the current Git worktree root and read `AGENTS.md` and nested agent-instruction files when present. Pure Plane administration that has no repository context does not require Git inspection; skip it instead of inventing a project.
+3. Apply explicit repository instructions as overrides for project selection, naming, states, modules, required metadata, validation commands, and Definition of Done.
 4. Ask one focused question when the target project or a required repository-specific value remains ambiguous.
+
+## Safe Workflow
+
+1. Resolve human names and identifiers to Plane UUIDs with list, search, or retrieve tools before writes. Never invent a UUID.
+2. Read the target object before updating or deleting it.
+3. Use `get_pql_reference` before composing non-trivial PQL filters.
+4. Make the smallest requested mutation. Preserve unrelated fields and relationships. Send only the fields you intend to change.
+5. Read the result back after writes. Report identifiers, changed fields, and any validation gap.
+
+## Confirmation Requirements
+
+Request explicit confirmation before any destructive or broad operation, including:
+
+- deleting or archiving projects, work items, comments, links, attachments, or definitions;
+- bulk or batch mutations, and any change that touches many work items or every project;
+- moving or re-linking work across projects, cycles, modules, or initiatives;
+- marking work `Done` or `Cancelled`;
+- accepting, deferring, or dismissing a material review finding;
+- creating workspace-scoped types, states, or properties when a narrower scope was requested.
+
+State the exact objects and effect, then wait for the confirmation. Do not treat a general request as blanket authorization for destructive actions.
+
+## HTML Fields And Mentions
+
+Plane stores rich text as HTML, not Markdown:
+
+- `description_html` (work item, project, initiative, page, and other rich-text fields) and `comment_html` must contain HTML markup such as `<p>`, `<ul>`, `<li>`, `<strong>`, and `<code>`. Markdown text will not render as intended.
+- Read `description_stripped` or the rendered text to inspect existing content; write `description_html` when changing it.
+- Mentions reference a project member by UUID, not by display name. Resolve the member's UUID first with `member list_project`, then write `@[<user-uuid>]` inside `comment_html`. A bare `@name` is ordinary text and sends no notification.
+- Keep credentials, tokens, PII, and sensitive payloads out of HTML fields, comments, and links.
+
+## Work Items And Epics
+
+- Use work item tools for issues, tasks, and epics.
+- Resolve the `Epic` work item type in the selected project instead of assuming a type ID.
+- Treat `workitem_type resolve` as potentially mutating: it finds a type or creates it when missing. Inspect existing types first (`workitem_type list` / `retrieve`), and only resolve, import, or create a type when there is a real need and explicit authorization. Prefer reusing an existing type.
+- Use the parent relationship required by local policy. Never assume a fixed hierarchy.
+- Resolve states, labels, assignees, cycles, modules, milestones, estimates, and custom properties by current Plane data.
 
 ## Work Item Design
 
@@ -58,20 +112,7 @@ Then ...
 - Repository Definition of Done satisfied.
 ```
 
-## Safe Workflow
-
-1. Resolve human names and identifiers to Plane UUIDs with list, search, or retrieve tools before writes.
-2. Read the target object before updating or deleting it.
-3. Use `get_pql_reference` before composing non-trivial PQL filters.
-4. Make the smallest requested mutation. Preserve unrelated fields and relationships.
-5. Read the result back after writes. Report identifiers, changed fields, and any validation gap.
-
-## Work Items And Epics
-
-- Use work item tools for issues, tasks, and epics.
-- Resolve the `Epic` work item type in the selected project instead of assuming a type ID.
-- Use the parent relationship required by local policy. Never assume a fixed hierarchy.
-- Resolve states, labels, assignees, cycles, modules, milestones, estimates, and custom properties by current Plane data.
+When writing this structure, convert it to HTML for `description_html` and write checkpoint records as HTML for `comment_html`.
 
 ## State Flow
 
@@ -84,6 +125,8 @@ Then ...
 - Use `Cancelled` only for discarded work and record the reason.
 - Never move directly from active implementation to `Done`. Require a review or validation state first.
 - When validation fails with actionable corrections, use `Changes Requested`. When evidence is inconclusive, keep `Review & Test` while investigating; use `Blocked` only for a documented impediment.
+
+Resolve states from the actual project workflow. Suggested state names in this skill are preferences only. If a preferred state does not exist, choose the closest existing state or ask; never create a missing state automatically.
 
 ## Completion
 
