@@ -41,7 +41,7 @@ Before editing code for a new feature:
 2. Detect the repository's actual default/base branch instead of assuming `origin/main`. Prefer the remote's reported default (for example `git symbolic-ref refs/remotes/origin/HEAD`), then repository instructions, then an explicit `main`/`master` fallback. Never hardcode `main`.
 3. If the worktree has local changes, handle them contextually and stop to ask what to do with them when they are unrelated to the task. Never discard, move, stash, or commit existing local changes without explicit authorization, and never assume they belong to this work item.
 4. If a branch or PR already exists for the work item, continue there. Do not recreate, rebase, or replace it automatically.
-5. Otherwise, request explicit authorization before fetching the latest base branch or creating/switching to a feature branch. After authorization, create it from the fetched remote base, not from a potentially stale local branch.
+5. Otherwise, the user's explicit request to implement, correct, or complete the work item authorizes creating and switching to its short-lived feature branch. It does not authorize fetching. Create the branch from the detected local stable base only when available remote metadata does not show that base to be stale; otherwise stop and request authorization to synchronize first.
 6. Use the repository's branch naming convention when defined. Otherwise use `feature/<WORKITEM-ID>-<slug>`, for example `feature/ERP-123-add-customer-filter`.
 
 Treat a successfully fetched remote base as the latest stable base unless repository instructions require CI or another stability check. If the remote, default branch, work item identifier, or required branch convention cannot be resolved, ask one focused question instead of guessing. Do not begin implementation until branch preparation is complete.
@@ -51,7 +51,7 @@ Treat a successfully fetched remote base as the latest stable base unless reposi
 Act on Git only within the following limits:
 
 - No commit, push, pull-request creation or update, repository creation or settings change, tag, or release without explicit authorization for that action.
-- No fetch, pull, branch creation, branch switch, merge, or other local Git state change without explicit authorization. Read-only inspection such as `status`, `diff`, `log`, and remote metadata queries is allowed in advisory mode.
+- An explicit request to implement, correct, or complete the work item authorizes only the branch creation/switch or isolated branch worktree needed to begin that work. No fetch, pull, stash, reset, commit, push, merge, rebase, cherry-pick, PR mutation, branch deletion, or other Git state change is implied. Read-only inspection such as `status`, `diff`, `log`, and remote metadata queries is allowed in advisory mode.
 - No force push, history rewrite (rebase, amend of shared history, reset --hard on published work), or remote branch deletion without specific confirmation of the exact refs and effect.
 - Destructive local commands that could lose uncommitted work require explicit confirmation.
 - Do not run Git operations that mutate a remote as a side effect of an unrelated request.

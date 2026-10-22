@@ -28,6 +28,14 @@ manual. No lo apuntes con `OPENCODE_CONFIG` ni `OPENCODE_CONFIG_DIR`.
 Total: 7 skills. Los agentes viven dentro de `opencode.global.json` (no hay
 carpeta `agents/` ni `commands/` en este snapshot).
 
+`git-workflow-and-versioning` impone un gate antes de la primera modificación:
+nunca se edita ni se ejecutan comandos mutantes de implementación sobre la rama base estable.
+Cada tarea usa una rama corta creada desde esa base, incluso documentación,
+hotfixes y cambios triviales. Pedir una implementación autoriza únicamente
+crear/cambiar a esa rama o preparar un worktree aislado; no autoriza fetch,
+commit, push, merge, cherry-pick, cambios de PR ni otras mutaciones Git. Solo
+una integración revisada y autorizada por separado puede actualizar la base.
+
 `project-memory-gate` se evalúa antes de integrar trabajo terminado en la rama
 base real del repositorio. Analiza si el cambio contiene conocimiento durable
 que no pueda inferirse de forma fiable desde código, pruebas y configuración.
