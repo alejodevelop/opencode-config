@@ -63,7 +63,7 @@ Does the change fit the system's design?
 
 ### 4. Security
 
-For detailed security guidance, see `security-and-hardening`. Does the change introduce vulnerabilities?
+Does the change introduce vulnerabilities?
 
 - Is user input validated and sanitized?
 - Are secrets kept out of code, logs, and version control?
@@ -76,7 +76,7 @@ For detailed security guidance, see `security-and-hardening`. Does the change in
 
 ### 5. Performance
 
-For detailed profiling and optimization, see `performance-optimization`. Does the change introduce performance problems?
+Does the change introduce performance problems?
 
 - Any N+1 query patterns?
 - Any unbounded loops or unconstrained data fetching?
@@ -161,7 +161,7 @@ Tests reveal intent and coverage:
 - Would the tests catch a regression if the code changed?
 ```
 
-Answer the last question by experiment, not by reading. Invert one condition the change adds (drop a negation, swap `&&` for `||`), run the suite, then restore the file from a copy. A mutation that stays green is a finding: name the test case that is missing. For a project-wide mutation score, see `constraint-driven-development`.
+Answer the last question by experiment when safe and authorized. Introduce a bounded mutation, run the relevant suite, then restore it without disturbing unrelated work. A mutation that stays green is evidence of a missing test.
 
 ### Step 3: Review the Implementation
 
@@ -286,7 +286,7 @@ Part of code review is dependency review:
 1. Does the existing stack solve this? (Often it does.)
 2. How large is the dependency? (Check bundle impact.)
 3. Is it actively maintained? (Check last commit, open issues.)
-4. Does it have known vulnerabilities? (`npm audit`)
+4. Does it have known vulnerabilities? Use the ecosystem's repository-defined audit tooling.
 5. What's the license? (Must be compatible with the project.)
 
 **Rule:** Prefer standard library and existing utilities over new dependencies. Every dependency is a liability.
@@ -299,7 +299,7 @@ Part of code review is dependency review:
 4. **Mind the transitive graph.** Most installed packages are ones nobody chose directly. Review the lockfile diff, not just `package.json`; a single direct bump can pull in dozens of indirect changes.
 5. **Keep the lockfile honest.** Commit it, review its diff, and never hand-edit it. The lockfile is the thing that actually pins what ships.
 
-For triaging `npm audit` findings and supply-chain risk (typosquatting, compromised maintainers), follow the `security-and-hardening` skill — this section covers the upgrade *workflow*, that one covers the security verdict.
+Treat audit findings and supply-chain risks such as typosquatting or compromised maintainers as security evidence, not automatic upgrade instructions.
 
 ## The Review Checklist
 
@@ -348,11 +348,6 @@ For triaging `npm audit` findings and supply-chain risk (typosquatting, compromi
 - [ ] **Approve** — Ready to merge
 - [ ] **Request changes** — Issues must be addressed
 ```
-## See Also
-
-- For detailed security review guidance, see `../../references/security-checklist.md`
-- For performance review checks, see `../../references/performance-checklist.md`
-
 ## Common Rationalizations
 
 | Rationalization | Reality |
