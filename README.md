@@ -24,12 +24,24 @@ manual. No lo apuntes con `OPENCODE_CONFIG` ni `OPENCODE_CONFIG_DIR`.
 | `skills/project-memory-gate/` | Gate previo a integración para memoria durable, con política y plantillas |
 | `skills/plane-work-management/SKILL.md` | Gestión de proyectos y work items en Plane |
 | `skills/plane-workitem-development/SKILL.md` | Desarrollo de un work item de Plane de punta a punta |
+| `skills/writing-for-agents/` | Redacción predecible y eficiente de skills e instrucciones para agentes |
 
-Total: 7 skills. Los agentes viven dentro de `opencode.global.json` (no hay
+Total: 8 skills. Los agentes viven dentro de `opencode.global.json` (no hay
 carpeta `agents/` ni `commands/` en este snapshot).
 
+`writing-for-agents` es la versión vigente de la antigua
+`writing-great-skills`. Se conserva completa desde
+[`mattpocock/skills`](https://github.com/mattpocock/skills) y se usa como
+referencia al crear, editar y revisar skills, `AGENTS.md` e instrucciones para
+agentes. `build` y `plan` también priorizan respuestas concisas y densas en
+información, ampliándolas solo cuando la complejidad, el riesgo o el usuario lo
+requieren. La copia actual proviene de la revisión upstream
+`5beb35b040e3de97e54fa9e386d7e42d15c295c2`; antes de actualizarla se revisa
+el diff contra esa procedencia.
+
 `git-workflow-and-versioning` impone un gate antes de la primera modificación:
-nunca se edita ni se ejecutan comandos mutantes de implementación sobre la rama base estable.
+nunca se edita ni se ejecutan comandos mutantes de implementación sobre la
+rama base estable.
 Cada tarea usa una rama corta creada desde esa base, incluso documentación,
 hotfixes y cambios triviales. Pedir una implementación autoriza únicamente
 crear/cambiar a esa rama o preparar un worktree aislado; no autoriza fetch,

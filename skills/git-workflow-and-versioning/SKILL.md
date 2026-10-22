@@ -106,19 +106,11 @@ git commit -m "feat: add phone number validation to registration"
 git commit -m "refactor validation and add phone number field"
 ```
 
-**Separate refactoring from feature work.** A refactoring change and a feature change are two different changes — submit them separately. This makes each change easier to review, revert, and understand in history. Small cleanups (renaming a variable) can be included in a feature commit at reviewer discretion.
+Keep refactoring separate from feature work. Use `code-review-and-quality` for change sizing and splitting criteria.
 
 ### 5. Size Your Changes
 
-Target ~100 lines per commit/PR. Changes over ~1000 lines should be split. See the splitting strategies in `code-review-and-quality` for how to break down large changes.
-
-```
-~100 lines  → Easy to review, easy to revert
-~300 lines  → Acceptable for a single logical change
-~1000 lines → Split into smaller changes
-```
-
-## Branching Strategy
+Use the thresholds and splitting strategies in `code-review-and-quality`; keep this skill focused on Git history and integration.
 
 ## Pre-Change Branch Safety Gate
 
@@ -188,7 +180,7 @@ git worktree remove ../project-feature-a
 Benefits:
 - Multiple agents can work on different features simultaneously
 - No branch switching needed (each directory has its own branch)
-- If one experiment fails, delete the worktree — nothing is lost
+- If one experiment fails, inspect and preserve valuable changes before requesting authorized worktree cleanup
 - Changes are isolated until explicitly merged
 
 Run the branch safety gate inside every linked worktree before modifying it. A worktree checked out on the stable base remains read-only; detached worktrees must be attached to an authorized task branch before implementation.
@@ -209,7 +201,7 @@ Agent starts work
     └── Feature complete → All commits form a clean history
 ```
 
-This pattern means you never lose more than one increment of work. If an agent goes off the rails, `git reset --hard HEAD` takes you back to the last successful state.
+This pattern limits each recovery to one increment. Use only recovery commands authorized for the current repository state; do not discard work automatically.
 
 ## Change Summaries
 
@@ -235,38 +227,10 @@ This pattern catches wrong assumptions early and gives reviewers a clear map of 
 
 Before every commit:
 
-```bash
-# 1. Reconfirm this worktree is on the intended non-base task branch
-git branch --show-current
-git status --short --branch
-
-# 2. Check what you're about to commit
-git diff --staged
-
-# 3. Ensure no secrets
-git diff --staged | grep -i "password\|secret\|api_key\|token"
-
-# 4. Run tests
-npm test
-
-# 5. Run linting
-npm run lint
-
-# 6. Run type checking
-npx tsc --noEmit
-```
-
-Automate this with git hooks:
-
-```json
-// package.json (using lint-staged + husky)
-{
-  "lint-staged": {
-    "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
-    "*.{json,md}": ["prettier --write"]
-  }
-}
-```
+1. Reconfirm this worktree is on the intended non-base task branch.
+2. Inspect the exact staged diff and staged file inventory.
+3. Run the repository-defined secret checks and relevant validation commands. Discover them from repository instructions, task runners, manifests, and CI instead of assuming a language or package manager.
+4. Confirm generated files and dependency metadata are intentional.
 
 ## Pre-Integration Project Memory Gate
 
@@ -285,9 +249,9 @@ Do not skip the gate for small changes; record a concise `No memory update` verd
 
 ## Handling Generated Files
 
-- **Commit generated files** only if the project expects them (e.g., `package-lock.json`, Prisma migrations)
-- **Don't commit** build output (`dist/`, `.next/`), environment files (`.env`), or IDE config (`.vscode/settings.json` unless shared)
-- **Have a `.gitignore`** that covers: `node_modules/`, `dist/`, `.env`, `.env.local`, `*.pem`
+- Follow repository instructions and existing tracking conventions for generated files, dependency locks, build artifacts, editor configuration, and environment templates.
+- Inspect ignored and untracked files before staging. Keep credentials, private keys, machine-local state, and secret-bearing environment files out of version control.
+- Treat `.gitignore` and tracked generated output as repository-specific policy; propose changes only when the current policy creates a verified risk or omits a known local artifact.
 
 ## Using Git for Debugging
 
@@ -323,7 +287,7 @@ For anything with consumers, version `MAJOR.MINOR.PATCH` and let the number carr
   PATCH  bug fix, backward-compatible — safe to upgrade
 ```
 
-The number is a promise, so make the code match it. A "patch" that changes behavior consumers relied on is a major change wearing a disguise (Hyrum's Law — see the `api-and-interface-design` skill). When unsure whether a change is breaking, assume it is; a surprise major is far cheaper than a broken consumer.
+The number is a promise, so make the code match it. A "patch" that changes behavior consumers relied on is a major change wearing a disguise. When unsure whether a change is breaking, assume it is; a surprise major is far cheaper than a broken consumer.
 
 ### Tag the release, and let the tag be the source of truth
 
@@ -350,7 +314,7 @@ A changelog is not `git log`. It's the curated, consumer-facing answer to "what 
 - `GET /v1/tasks/all` — use the paginated `GET /v1/tasks` (removal in 2.0)
 ```
 
-Write the entry in the same change that makes the change, while the impact is fresh — not reconstructed from commit archaeology at release time. Breaking changes get a migration note and a deprecation window (follow the `deprecation-and-migration` skill); shipping the actual release is the `shipping-and-launch` skill's job — this section is the versioning contract that feeds it.
+Write the entry in the same change that makes the change, while the impact is fresh rather than reconstructed from commit archaeology. Breaking changes need a migration note and deprecation window; release execution follows the repository's own shipping procedure.
 
 ## Common Rationalizations
 
@@ -363,7 +327,7 @@ Write the entry in the same change that makes the change, while the impact is fr
 | "It's only one line; I'll change it on main" | Change size never overrides isolation. Create a short-lived branch before any modification. |
 | "This hotfix is too urgent for a branch" | Urgency calls for a short-lived `hotfix/*` branch, not unreviewed work on the stable base. |
 | "I'll split this change later" | Large changes are harder to review, riskier to deploy, and harder to revert. Split before submitting, not after. |
-| "I don't need a .gitignore" | Until `.env` with production secrets gets committed. Set it up immediately. |
+| "Ignore policy doesn't matter" | Verify the repository's exclusion mechanism keeps credentials and machine-local state out of version control. |
 | "It's just a small fix, bump the patch" | Check what consumers can observe. A behavior change they relied on is a major, whatever the diff size. |
 | "The changelog is just the commit log" | Commits are for you; the changelog is for consumers, curated by impact. Generating one from raw commits buries what matters. |
 | "We'll write the changelog at release time" | By then the impact is reconstructed from memory and half of it is missing. Write the entry with the change. |
@@ -373,8 +337,8 @@ Write the entry in the same change that makes the change, while the impact is fr
 - Large uncommitted changes accumulating
 - Commit messages like "fix", "update", "misc"
 - Formatting changes mixed with behavior changes
-- No `.gitignore` in the project
-- Committing `node_modules/`, `.env`, or build artifacts
+- Secret-bearing or machine-local files are not covered by the repository's exclusion policy
+- Generated files or build artifacts are staged contrary to repository policy
 - Long-lived branches that diverge significantly from main
 - Any file modification or mutating implementation command performed while the worktree is on the stable default/base branch
 - A direct commit or cherry-pick onto the stable default/base branch
@@ -394,7 +358,7 @@ For every commit:
 - [ ] Tests pass before committing
 - [ ] No secrets in the diff
 - [ ] No formatting-only changes mixed with behavior changes
-- [ ] `.gitignore` covers standard exclusions
+- [ ] Ignored, untracked, generated, and machine-local files follow repository policy
 
 For every release (anything with consumers):
 
