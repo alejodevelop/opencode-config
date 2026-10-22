@@ -21,11 +21,19 @@ manual. No lo apuntes con `OPENCODE_CONFIG` ni `OPENCODE_CONFIG_DIR`.
 | `skills/code-review-and-quality/SKILL.md` | Revisión de código multi-eje antes de mergear |
 | `skills/find-skills/SKILL.md` | Descubrir e instalar skills |
 | `skills/git-workflow-and-versioning/SKILL.md` | Flujo Git, commits, PRs, releases |
+| `skills/project-memory-gate/` | Gate previo a integración para memoria durable, con política y plantillas |
 | `skills/plane-work-management/SKILL.md` | Gestión de proyectos y work items en Plane |
 | `skills/plane-workitem-development/SKILL.md` | Desarrollo de un work item de Plane de punta a punta |
 
-Total: 6 skills. Los agentes viven dentro de `opencode.global.json` (no hay
+Total: 7 skills. Los agentes viven dentro de `opencode.global.json` (no hay
 carpeta `agents/` ni `commands/` en este snapshot).
+
+`project-memory-gate` se evalúa antes de integrar trabajo terminado en la rama
+base real del repositorio. Analiza si el cambio contiene conocimiento durable
+que no pueda inferirse de forma fiable desde código, pruebas y configuración.
+La evaluación siempre se realiza, pero crear o actualizar memoria requiere
+confirmación explícita; un resultado `No memory update` es normal. La skill no
+autoriza commits, pushes, cambios de PR ni merges.
 
 ## Configuración V2 (`opencode.global.json`)
 

@@ -241,6 +241,21 @@ Automate this with git hooks:
 }
 ```
 
+## Pre-Integration Project Memory Gate
+
+Before requesting, approving, or performing any operation that lands completed, validated work on the repository's actual default/base branch, invoke `project-memory-gate`. This includes PR merges, branch merges, cherry-picks, and direct commits. The evaluation is mandatory even when the expected result is that no durable memory should be added.
+
+Run it only after implementation, verification, and review are complete and the change is frozen. If it identifies durable project knowledge, obtain explicit user approval before writing the proposed decision, runbook, or scoped `AGENTS.md` guidance. Approval to merge, commit, push, or update a PR does not implicitly authorize a memory write, and the gate does not authorize any Git mutation.
+
+The integration sequence is:
+
+```text
+implement → test → review → freeze → project-memory-gate
+          → approved memory update if needed → focused review → integrate
+```
+
+Do not skip the gate for small changes; record a concise `No memory update` verdict when the code, tests, and configuration already express everything future contributors need.
+
 ## Handling Generated Files
 
 - **Commit generated files** only if the project expects them (e.g., `package-lock.json`, Prisma migrations)
