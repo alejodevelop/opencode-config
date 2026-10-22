@@ -21,13 +21,22 @@ manual. No lo apuntes con `OPENCODE_CONFIG` ni `OPENCODE_CONFIG_DIR`.
 | `skills/code-review-and-quality/SKILL.md` | Revisión de código multi-eje antes de mergear |
 | `skills/find-skills/SKILL.md` | Descubrir e instalar skills |
 | `skills/git-workflow-and-versioning/SKILL.md` | Flujo Git, commits, PRs, releases |
+| `skills/grill-me/` | Entrada manual para interrogar y endurecer un plan o diseño |
+| `skills/grilling/` | Entrevista iterativa que resuelve el árbol de decisiones |
 | `skills/project-memory-gate/` | Gate previo a integración para memoria durable, con política y plantillas |
 | `skills/plane-work-management/SKILL.md` | Gestión de proyectos y work items en Plane |
 | `skills/plane-workitem-development/SKILL.md` | Desarrollo de un work item de Plane de punta a punta |
 | `skills/writing-for-agents/` | Redacción predecible y eficiente de skills e instrucciones para agentes |
 
-Total: 8 skills. Los agentes viven dentro de `opencode.global.json` (no hay
+Total: 10 skills. Los agentes viven dentro de `opencode.global.json` (no hay
 carpeta `agents/` ni `commands/` en este snapshot).
+
+`grill-me` es la entrada manual y delega en `grilling`, que conduce rondas de
+preguntas hasta cerrar las decisiones de un plan antes de implementar. No
+escribe memoria del proyecto: `project-memory-gate` conserva su función
+separada antes de integrar trabajo validado. Ambas copias provienen de
+[`mattpocock/skills`](https://github.com/mattpocock/skills), revisión
+`5beb35b040e3de97e54fa9e386d7e42d15c295c2`.
 
 `writing-for-agents` es la versión vigente de la antigua
 `writing-great-skills`. Se conserva completa desde
