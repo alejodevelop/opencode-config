@@ -1,6 +1,6 @@
 ---
 name: project-memory-gate
-description: Evaluate whether completed, validated work contains durable project knowledge before it lands on the repository's default/base branch. Use for every preparation, approval, request, or performance of integration into that branch, including trivial changes, PR merges, branch merges, cherry-picks, and direct commits; also use when a lasting architectural decision, non-obvious invariant, recurring operational procedure, verified gotcha, deprecation, or supersession is discovered. The evaluation is mandatory before integration, but writing memory is exceptional and always requires explicit user confirmation. Session summaries, temporary plans, routine details, and trivial fixes normally produce a no-memory verdict rather than a memory artifact.
+description: Evaluate whether completed, validated work contains durable project knowledge before it lands on the repository's default/base branch through a reviewed branch or PR merge. Use for every preparation, approval, request, or performance of that integration, including trivial changes; also use when a lasting architectural decision, non-obvious invariant, recurring operational procedure, verified gotcha, deprecation, or supersession is discovered. The evaluation is mandatory before integration, but writing memory is exceptional and always requires explicit user confirmation. Session summaries, temporary plans, routine details, and trivial fixes normally produce a no-memory verdict rather than a memory artifact.
 license: MIT
 compatibility: Designed for Git repositories and Agent Skills-compatible coding agents. Git writes and remote operations remain subject to the host agent's authorization policy.
 metadata:
@@ -14,7 +14,7 @@ Preserve only durable, evidence-backed knowledge that future contributors cannot
 
 ## Authority And Safety
 
-- Run the evaluation before any operation that lands completed work on the actual default/base branch, including a PR merge, branch merge, cherry-pick, or direct commit. Never assume the branch is named `main`.
+- Run the evaluation before a reviewed branch or PR merge lands completed work on the actual default/base branch. Never assume the branch is named `main`. The branch safety gate in `git-workflow-and-versioning` separately prohibits development on the stable base and prohibits direct commits or cherry-picks onto it; this memory gate cannot waive that policy.
 - Evaluation is read-only. It does not itself authorize edits, commits, pushes, PR changes, merges, branch changes, fetches, or other Git mutations.
 - Only the primary implementation agent may perform memory writes. Read-only or review agents return evidence and recommendations; the primary agent owns the proposal presented to the user.
 - Never write memory without explicit user approval of the proposed memory item. Approval to implement, commit, push, open a PR, or merge is not approval to create memory.

@@ -1,6 +1,6 @@
 ---
 name: git-workflow-and-versioning
-description: Structures git workflow practices. Use when making any code change. Use when committing, branching, resolving conflicts, splitting uncommitted work in a messy working tree into clean atomic commits, opening or reviewing a pull request (PR), pushing to a remote, or when you need to organize work across multiple parallel streams. Use when cutting a release, choosing a semantic version bump, tagging, or writing a changelog.
+description: Structures Git workflow practices and enforces a mandatory pre-change branch safety gate. Use before any file modification or mutating implementation command to verify development is not occurring on the repository's stable default/base branch. Use when making any code, documentation, configuration, or generated-file change; committing, branching, resolving conflicts, opening or reviewing a pull request, pushing, releasing, or organizing parallel work. Every implementation must use a short-lived branch created from the stable base; direct development on the base is never allowed.
 ---
 
 # Git Workflow and Versioning
@@ -11,13 +11,13 @@ Git is your safety net. Treat commits as save points, branches as sandboxes, and
 
 ## When to Use
 
-Always. Every code change flows through git.
+Always. Every implementation change flows through Git. Before the first implementation edit or any implementation/development command that can modify files, run the Pre-Change Branch Safety Gate below. Read-only planning, exploration, review, and separately authorized reviewed integration are not development work; they follow their own safety and authorization gates.
 
 ## Core Principles
 
-### Trunk-Based Development (Recommended)
+### Trunk-Based Development (Required Isolation)
 
-Keep `main` always deployable. Work in short-lived feature branches that merge back within 1-3 days. Long-lived development branches are hidden costs — they diverge, create merge conflicts, and delay integration. DORA research consistently shows trunk-based development correlates with high-performing engineering teams.
+Keep the repository's stable default/base branch deployable and untouched by development work. All changes use short-lived branches that merge back within 1-3 days. Long-lived development branches are hidden costs — they diverge, create merge conflicts, and delay integration.
 
 ```
 main ──●──●──●──●──●──●──●──●──●──  (always deployable)
@@ -25,7 +25,7 @@ main ──●──●──●──●──●──●──●──●─
          ●──●─╱    ●──╱    ← short-lived feature branches (1-3 days)
 ```
 
-This is the recommended default. Teams using gitflow or long-lived branches can adapt the principles (atomic commits, small changes, descriptive messages) to their branching model — the commit discipline matters more than the specific branching strategy.
+Repository-specific naming and integration conventions may vary, but branch isolation does not: never edit or run a mutating implementation command while the current worktree is on its stable default/base branch.
 
 - **Dev branches are costs.** Every day a branch lives, it accumulates merge risk.
 - **Release branches are acceptable.** When you need to stabilize a release while main moves forward.
@@ -120,6 +120,25 @@ Target ~100 lines per commit/PR. Changes over ~1000 lines should be split. See t
 
 ## Branching Strategy
 
+## Pre-Change Branch Safety Gate
+
+Run this gate before the first implementation edit, patch, write, formatter, code generator, migration, dependency installer, test with write side effects, or other implementation/development command that can modify the worktree. A separately authorized reviewed integration is governed by the Pre-Integration Project Memory Gate and repository integration procedure instead; it does not permit implementation edits on the stable base.
+
+1. Find the current worktree root and read applicable repository instructions.
+2. Inspect the worktree's own current branch and status. A linked worktree has an independent `HEAD`; never infer it from another checkout.
+3. Detect the actual stable default/base branch without fetching. Prefer the remote's reported default, then repository instructions, then an unambiguous local `main` or `master`. Never assume the name when evidence conflicts.
+4. Before creating a branch, compare the local base commit with available remote metadata using read-only inspection. If the remote base cannot be inspected, follow repository instructions or ask when freshness matters. If metadata shows the local base is stale or divergent, stop and request authorization before fetching or synchronizing it.
+5. If the worktree is dirty with changes not already established as part of this same task, stop and ask. Never move, stash, reset, discard, commit, or absorb existing changes silently.
+6. If `HEAD` is detached, the base is unresolved, or the repository has no initial commit, stop and ask for the missing decision. Do not edit.
+7. If the current branch is the stable base, create and switch to a short-lived task branch from the verified base, then verify the branch and status again before editing.
+8. If already on a non-base branch, confirm it belongs to this same task and was created from the verified stable base. Every new task requires a fresh branch or isolated worktree from that base; never reuse another task's branch or stack new work on it.
+
+An explicit request to implement, fix, update, refactor, or otherwise modify a repository authorizes the primary agent to create and switch to the necessary short-lived branch or create an isolated branch worktree. That limited authorization does **not** authorize fetch, pull, stash, reset, commit, push, merge, rebase, cherry-pick, PR mutation, branch deletion, tag, or release.
+
+This gate has no override. Not for a one-line fix, documentation, configuration, generated files, a hotfix, an emergency, or a direct user request to work on the stable branch. Use a `hotfix/*` branch for emergencies. If a safe work branch cannot be prepared, block implementation rather than modify the stable branch.
+
+Direct commits and cherry-picks onto the stable base are prohibited integration paths. Completed work reaches the stable branch only through the repository's reviewed branch/PR merge process. A separately authorized reviewed integration may update the stable base; it is not development work and does not waive the requirement that all implementation occurred on its task branch.
+
 ### Feature Branches
 
 ```
@@ -130,7 +149,7 @@ main (always deployable)
   └── fix/duplicate-tasks      ← Bug fixes
 ```
 
-- Branch from `main` (or the team's default branch)
+- Branch from the repository's detected stable default/base branch; never work directly on that branch
 - Keep branches short-lived (merge within 1-3 days) — long-lived branches are hidden costs
 - Delete branches after merge
 - Prefer feature flags over long-lived branches for incomplete features
@@ -142,6 +161,8 @@ feature/<short-description>   → feature/task-creation
 fix/<short-description>       → fix/duplicate-tasks
 chore/<short-description>     → chore/update-deps
 refactor/<short-description>  → refactor/auth-module
+hotfix/<short-description>    → hotfix/payment-outage
+docs/<short-description>      → docs/update-installation
 ```
 
 ## Working with Worktrees
@@ -169,6 +190,8 @@ Benefits:
 - No branch switching needed (each directory has its own branch)
 - If one experiment fails, delete the worktree — nothing is lost
 - Changes are isolated until explicitly merged
+
+Run the branch safety gate inside every linked worktree before modifying it. A worktree checked out on the stable base remains read-only; detached worktrees must be attached to an authorized task branch before implementation.
 
 ## The Save Point Pattern
 
@@ -213,19 +236,23 @@ This pattern catches wrong assumptions early and gives reviewers a clear map of 
 Before every commit:
 
 ```bash
-# 1. Check what you're about to commit
+# 1. Reconfirm this worktree is on the intended non-base task branch
+git branch --show-current
+git status --short --branch
+
+# 2. Check what you're about to commit
 git diff --staged
 
-# 2. Ensure no secrets
+# 3. Ensure no secrets
 git diff --staged | grep -i "password\|secret\|api_key\|token"
 
-# 3. Run tests
+# 4. Run tests
 npm test
 
-# 4. Run linting
+# 5. Run linting
 npm run lint
 
-# 5. Run type checking
+# 6. Run type checking
 npx tsc --noEmit
 ```
 
@@ -243,7 +270,7 @@ Automate this with git hooks:
 
 ## Pre-Integration Project Memory Gate
 
-Before requesting, approving, or performing any operation that lands completed, validated work on the repository's actual default/base branch, invoke `project-memory-gate`. This includes PR merges, branch merges, cherry-picks, and direct commits. The evaluation is mandatory even when the expected result is that no durable memory should be added.
+Before requesting, approving, or performing a reviewed branch/PR merge that lands completed, validated work on the repository's actual default/base branch, invoke `project-memory-gate`. The evaluation is mandatory even when the expected result is that no durable memory should be added. It does not make direct commits or cherry-picks onto the stable base permissible.
 
 Run it only after implementation, verification, and review are complete and the change is frozen. If it identifies durable project knowledge, obtain explicit user approval before writing the proposed decision, runbook, or scoped `AGENTS.md` guidance. Approval to merge, commit, push, or update a PR does not implicitly authorize a memory write, and the gate does not authorize any Git mutation.
 
@@ -333,6 +360,8 @@ Write the entry in the same change that makes the change, while the impact is fr
 | "The message doesn't matter" | Messages are documentation. Future you (and future agents) will need to understand what changed and why. |
 | "I'll squash it all later" | Squashing destroys the development narrative. Prefer clean incremental commits from the start. |
 | "Branches add overhead" | Short-lived branches are free and prevent conflicting work from colliding. Long-lived branches are the problem — merge within 1-3 days. |
+| "It's only one line; I'll change it on main" | Change size never overrides isolation. Create a short-lived branch before any modification. |
+| "This hotfix is too urgent for a branch" | Urgency calls for a short-lived `hotfix/*` branch, not unreviewed work on the stable base. |
 | "I'll split this change later" | Large changes are harder to review, riskier to deploy, and harder to revert. Split before submitting, not after. |
 | "I don't need a .gitignore" | Until `.env` with production secrets gets committed. Set it up immediately. |
 | "It's just a small fix, bump the patch" | Check what consumers can observe. A behavior change they relied on is a major, whatever the diff size. |
@@ -347,6 +376,8 @@ Write the entry in the same change that makes the change, while the impact is fr
 - No `.gitignore` in the project
 - Committing `node_modules/`, `.env`, or build artifacts
 - Long-lived branches that diverge significantly from main
+- Any file modification or mutating implementation command performed while the worktree is on the stable default/base branch
+- A direct commit or cherry-pick onto the stable default/base branch
 - Force-pushing to shared branches
 - A breaking change shipped under a minor or patch version bump
 - A release with no tag, or a version number hand-edited out of sync with the tag
@@ -356,6 +387,8 @@ Write the entry in the same change that makes the change, while the impact is fr
 
 For every commit:
 
+- [ ] The change was developed entirely on a task branch created from the detected stable base
+- [ ] The current worktree is still on the intended non-base task branch
 - [ ] Commit does one logical thing
 - [ ] Message explains the why, follows type conventions
 - [ ] Tests pass before committing
