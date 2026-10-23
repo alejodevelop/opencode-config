@@ -1,6 +1,6 @@
 ---
 name: plane-workitem-development
-description: Develop, fix, test, review, or open a PR for a Plane work item while keeping its state, progress comments, and PR links synchronized. Use when starting or resuming implementation tied to Plane, addressing requested changes, reporting a blocker, handing work off for review, or finishing merged work.
+description: Develop, test, review, or deliver a Plane work item while synchronizing approved commits, PRs, and merges. Use when implementing work tied to Plane, recording an approved commit, handing work off for review, or finishing merged work.
 ---
 
 # Plane Work Item Development
@@ -80,94 +80,61 @@ Use repository-defined equivalents when these names do not exist:
 
 | Event | State | Required record |
 | --- | --- | --- |
-| Implementation actually starts | `In Progress` | Start comment when it adds context not already recorded |
-| Requested corrections actually start | `Changes Requested` to `In Progress` | Correction plan or acknowledged findings |
-| External impediment prevents progress | `Blocked` | Cause, evidence, unblock owner, next action |
-| Impediment clears | Appropriate active state | Resolution and resumed action |
-| Implementation is validated and ready for review | `Review & Test` | Delivery summary, validation evidence, PR link when code review uses a PR |
-| Review finds mandatory corrections | `Changes Requested` | Actionable findings and conditions for returning to review |
-| Corrections are validated | `Review & Test` | Resolved findings and rerun validation |
+| Implementation actually starts | `In Progress` | No automatic comment |
+| Requested corrections actually start | `Changes Requested` to `In Progress` | No automatic comment |
+| External impediment prevents progress | `Blocked` only when the user explicitly requests Plane synchronization | No automatic comment |
+| Impediment clears | Appropriate active state, only when previously synchronized | No automatic comment |
+| Implementation is validated and ready for review | `Review & Test` | PR handoff comment when a PR exists; otherwise no automatic comment |
+| Review finds mandatory corrections | `Changes Requested` | No automatic comment; report findings in conversation unless the user requests a Plane record |
+| Corrections are validated | `Review & Test` | No automatic comment until manual approval and commit creation; then use the approved-commit comment. Add a PR handoff comment only when handing back for review |
 | PR is merged and Definition of Done is demonstrated | `Done` after explicit confirmation | Merge and completion evidence |
-| Work is intentionally abandoned | `Cancelled` after explicit confirmation | Reason and disposition of partial work |
+| Work is intentionally abandoned | `Cancelled` after explicit confirmation | No automatic comment unless explicitly requested |
 
 Do not move an item merely because work is planned. `Changes Requested` means corrections are waiting to be resumed, not active implementation. Never move directly from active implementation to `Done`; require review or validation first.
 
 Use `Blocked` only for an external impediment or unresolved dependency. Review defects belong in `Changes Requested`.
 
-## Progress Records
+## Automatic Comments
 
-Comment only at meaningful checkpoints. Do not post a diary entry for every command, file, commit, or passing test. Use the language established by the work item or repository. Write comment bodies as HTML for `comment_html`; do not send Markdown that Plane will not render.
+Automatic AI comments are allowed only for:
 
-Checkpoint records always belong in comments: start or resume context, discoveries, spike observations and results, validation evidence, decisions, blockers, review delivery, corrections, and completion evidence. The description remains the durable work contract. Update it only when requirements, scope, constraints, acceptance criteria, or required validation change; add a comment explaining the durable change and its reason.
+1. **Each approved commit:** after manual approval and commit creation, post the commit hash or link, behavior delivered, automated verification and result, and confirmation of manual approval.
+2. **PR handoff:** post the PR link, consolidated scope, validation evidence, and next review action.
+3. **Confirmed merge:** post the merged PR or integration reference and final outcome.
 
-Post detailed evidence on the work item whose work produced it. For parent and child items, summarize cross-child conclusions, aggregate risks, final decisions, and follow-up work on the parent, but never leave a child's evidence only on the parent.
+Do not automatically comment starts, plans, intermediate progress, discoveries, spikes, red-green steps, test runs, transient attempts, or blockers. Report blockers in conversation; write them to Plane only on explicit user instruction. Add customer context, product notes, or other discretionary information only when explicitly instructed.
 
-### Start Or Resume
+Check existing comments and links before writing. Keep comments brief, evidence-based, and formatted as HTML for `comment_html`.
 
-Record only new context:
+### Approved Commit
 
-```markdown
-## Development started
-
-- Scope understood: ...
-- Immediate plan: ...
-- Risks or open questions: ...
+```html
+<h2>Approved commit</h2>
+<ul>
+  <li><strong>Commit:</strong> URL or hash</li>
+  <li><strong>Delivered:</strong> ...</li>
+  <li><strong>Automated verification:</strong> <code>command</code> — result</li>
+  <li><strong>Manual verification:</strong> approved by user</li>
+</ul>
 ```
 
-### Material Discovery
+### PR Handoff
 
-Comment when evidence changes scope, requirements, risk, or implementation direction. State the observation, impact, decision, and follow-up. Update the work item description only when its durable contract changed; keep transient progress in comments.
-
-### Spike Result
-
-For research or experimental work, comment with the hypothesis tested, setup, observations, reproducible evidence, limitations, conclusion, recommendation, and follow-up work. Keep these results out of the description even when the spike is complete. A parent spike receives only the synthesis across its children; each child retains its own detailed evidence.
-
-### Blocked
-
-```markdown
-## Blocked
-
-- Cause: ...
-- Evidence: ...
-- Unblock owner: ...
-- Next action after unblock: ...
-```
-
-### Ready For Review
-
-```markdown
-## Ready for review
-
-- Implemented: ...
-- Validation: `command` - result
-- PR: URL
-- Known gaps: none | ...
+```html
+<h2>PR ready for review</h2>
+<ul>
+  <li><strong>Implemented:</strong> ...</li>
+  <li><strong>Validation:</strong> <code>command</code> — result</li>
+  <li><strong>PR:</strong> URL</li>
+  <li><strong>Known gaps:</strong> none | ...</li>
+</ul>
 ```
 
 Report commands and results exactly. Never claim a check passed when it was not run. Distinguish failures caused by the change from environmental or pre-existing failures.
 
-### Changes Requested
+### Confirmed Merge
 
-Record concrete findings, locations, impact, required corrections, validation performed, and exact conditions for returning to review. Reuse the repository's review process or the `code-review-and-quality` skill when applicable. Do not make risk-acceptance decisions on the user's behalf.
-
-### Corrections Ready
-
-```markdown
-## Review corrections ready
-
-- Resolved: ...
-- Deferred or unresolved: none | ...
-- Validation rerun: `command` - result
-- PR: URL
-```
-
-### Completion
-
-Before requesting confirmation for `Done`, verify acceptance criteria are demonstrated, required checks passed, review completed, documentation is current, and no known security, privacy, data-loss, or operational blocker remains. When the work delivers versioned changes through a PR, also verify the PR is merged. A temporary spike that intentionally leaves no product changes does not require a PR; verify reproducible evidence and cleanup instead. Record concise evidence after confirmation.
-
-### Historical Repair
-
-When progress or results were previously placed in a description or only on a parent, preserve history: restore the description to its durable contract and add a clearly labeled historical-result comment on the work item that produced the evidence. State the evidence source when it came from another item. Do not delete existing comments merely to reorganize history.
+After confirming the PR merged, post the PR or integration reference and final outcome. Ask before moving the item to `Done`, as required by the state checkpoint.
 
 ## PR Registration
 
@@ -175,7 +142,7 @@ When a PR is created or discovered for the work item:
 
 1. Read existing work item links and comments.
 2. Add the canonical PR URL as a work item external link unless already present.
-3. Mention the same URL in the ready-for-review or corrections-ready comment with validation evidence.
+3. Mention the same URL in the PR handoff comment with validation evidence.
 4. Keep the item in active work for a draft or incomplete PR. Move it to `Review & Test` only when it is genuinely ready.
 
 Creating or updating the PR itself requires explicit Git authorization. Support the repository's Git host; do not assume GitHub, GitLab, Gitea, or a particular CLI. Do not create duplicate links or equivalent comments.
@@ -196,7 +163,7 @@ Before ending a development session:
 
 1. Run the relevant repository checks when feasible.
 2. Compare actual progress with the Plane state.
-3. Add any missing meaningful checkpoint comment or PR link.
+3. Add only a missing approved-commit, PR-handoff, or confirmed-merge comment, or PR link.
 4. Read back the work item and report its identifier, final state, recorded evidence, PR URL, and validation gaps.
 
 Do not hardcode project names, identifiers, state UUIDs, assignees, providers, branches, or validation commands in this skill.
