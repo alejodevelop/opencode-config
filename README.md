@@ -23,13 +23,25 @@ manual. No lo apuntes con `OPENCODE_CONFIG` ni `OPENCODE_CONFIG_DIR`.
 | `skills/git-workflow-and-versioning/SKILL.md` | Flujo Git, commits, PRs, releases |
 | `skills/grill-me/` | Entrada manual para interrogar y endurecer un plan o diseño |
 | `skills/grilling/` | Entrevista iterativa que resuelve el árbol de decisiones |
+| `skills/incremental-delivery/SKILL.md` | Control de alcance, cortes verticales y aprobación manual por incremento |
 | `skills/project-memory-gate/` | Gate previo a integración para memoria durable, con política y plantillas |
 | `skills/plane-work-management/SKILL.md` | Gestión de proyectos y work items en Plane |
-| `skills/plane-workitem-development/SKILL.md` | Desarrollo de un work item de Plane de punta a punta |
+| `skills/plane-workitem-development/SKILL.md` | Desarrollo de work items con trazabilidad por commit, PR y merge |
+| `skills/tdd/` | TDD con pruebas de comportamiento y ciclos rojo-verde por cortes verticales |
 | `skills/writing-for-agents/` | Redacción predecible y eficiente de skills e instrucciones para agentes |
 
-Total: 10 skills. Los agentes viven dentro de `opencode.global.json` (no hay
+Total: 12 skills. Los agentes viven dentro de `opencode.global.json` (no hay
 carpeta `agents/` ni `commands/` en este snapshot).
+
+`incremental-delivery` limita cada cambio al comportamiento solicitado, evita
+infraestructura o abstracciones especulativas y prioriza cortes verticales que el
+usuario pueda probar pronto. Invoca `tdd` para comportamientos automatizables y
+exige aprobación manual del incremento antes de cada commit, incluso cuando
+existen pruebas automáticas de interfaz.
+
+`plane-workitem-development` restringe los comentarios automáticos de IA a cada
+commit probado y aprobado, la entrega del PR y el merge confirmado. Bloqueos,
+notas de cliente y demás contexto solo se escriben cuando el usuario lo solicita.
 
 `grill-me` es la entrada manual y delega en `grilling`, que conduce rondas de
 preguntas hasta cerrar las decisiones de un plan antes de implementar. No
