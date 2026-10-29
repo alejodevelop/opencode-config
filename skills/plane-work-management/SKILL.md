@@ -117,13 +117,16 @@ When writing this structure, convert it to HTML for `description_html` and write
 ## State Flow
 
 - Prefer `Backlog -> Todo -> In Progress -> Review & Test -> Done` when those states exist and local policy does not define another flow.
-- Move a work item from `Review & Test` to `Changes Requested` when review finds actionable corrections. Record the findings and required validation before changing the state.
-- Keep the item in `Changes Requested` until the assignee confirms they have started the corrections; then move it to `In Progress`.
+- Before active work starts, resolve and add the human doing the work as an assignee without removing existing assignees, set the actual start date only when empty, move the item to `In Progress`, and read back all three values. Ask if the human is ambiguous or addition would require replacing an assignee.
+- Move a work item from `Review & Test` to `Changes Requested` when review findings are accepted for correction. Before correcting anything, record the accepted findings and required validation plus the decision and brief reason for every material finding deferred or dismissed.
+- Treat that review comment and transition as one logical checkpoint. Reconcile a partial write before continuing; never silently transition without the traceability comment.
+- Keep the item in `Changes Requested` until corrections actually start; then resolve and add the human performing them without removing existing assignees, preserve the original start date, move it to `In Progress` without requiring another confirmation, and read back the assignees, date, and state.
 - Move corrected work from `In Progress` back to `Review & Test`. Never treat `Changes Requested` as active implementation.
 - Treat `Blocked` as a pause from active work. Record the cause, unblock owner, and next action. Return to the appropriate active state after unblocking.
 - Do not use `Blocked` merely because review found defects. Use it only when an external impediment or unresolved dependency prevents progress.
 - Use `Cancelled` only for discarded work and record the reason.
 - Never move directly from active implementation to `Done`. Require a review or validation state first.
+- When moving to `Done` after explicit confirmation, record or verify the actual completion date. Use an automatically generated completion timestamp when Plane provides one; never substitute `target_date` or another planning field.
 - When validation fails with actionable corrections, use `Changes Requested`. When evidence is inconclusive, keep `Review & Test` while investigating; use `Blocked` only for a documented impediment.
 
 Resolve states from the actual project workflow. Suggested state names in this skill are preferences only. If a preferred state does not exist, choose the closest existing state or ask; never create a missing state automatically.

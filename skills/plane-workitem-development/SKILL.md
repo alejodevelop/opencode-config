@@ -68,6 +68,18 @@ Automatically update states, add comments, and attach PR links when a checkpoint
 
 Before every write, read the relevant Plane data. Make the smallest mutation, preserve unrelated fields, then read back the result. Resolve states by current project data; never hardcode UUIDs or assume every project uses the example names. Suggested state names below are preferences only; if a preferred state does not exist, choose the closest existing state or ask, and never auto-create a missing state.
 
+## Active Work Metadata
+
+Before implementation actually starts, synchronize the work item as one logical checkpoint:
+
+1. Resolve the human who will perform the work to a current Plane project member. Never assign an agent, service account, or inferred identity. Ask one focused question if the human cannot be identified unambiguously.
+2. Add that member as an assignee without removing existing assignees. If the project cannot represent the addition without replacement, ask before changing ownership.
+3. Set the actual start date only when it is empty. Preserve an existing start date, including when review corrections begin.
+4. Move the item to the project's active implementation state, normally `In Progress`.
+5. Read back and verify the assignees, start date, and state before editing code.
+
+When completing work, use Plane's actual completion field or the timestamp produced by transition to the project's completed state. Never substitute `target_date` or another planning date. If Plane sets completion automatically, verify it rather than writing a duplicate value.
+
 ## Atomicity And Idempotency Of Writes
 
 - A state change and its checkpoint comment are separate Plane calls and are not atomic. A transition can succeed while the comment fails, or vice versa.
@@ -80,14 +92,14 @@ Use repository-defined equivalents when these names do not exist:
 
 | Event | State | Required record |
 | --- | --- | --- |
-| Implementation actually starts | `In Progress` | Start comment when it adds context not already recorded |
+| Implementation actually starts | `In Progress` | Human assignee added, actual start date present, and start comment when it adds context |
 | Requested corrections actually start | `Changes Requested` to `In Progress` | Correction plan or acknowledged findings |
 | External impediment prevents progress | `Blocked` | Cause, evidence, unblock owner, next action |
 | Impediment clears | Appropriate active state | Resolution and resumed action |
 | Implementation is validated and ready for review | `Review & Test` | Delivery summary, validation evidence, PR link when code review uses a PR |
-| Review finds mandatory corrections | `Changes Requested` | Actionable findings and conditions for returning to review |
+| Review findings are accepted for correction | `Changes Requested` | Agreed findings, disposition of other material findings, and required validation recorded before correction starts |
 | Corrections are validated | `Review & Test` | Resolved findings and rerun validation |
-| PR is merged and Definition of Done is demonstrated | `Done` after explicit confirmation | Merge and completion evidence |
+| PR is merged and Definition of Done is demonstrated | `Done` after explicit confirmation | Merge and completion evidence plus actual completion date |
 | Work is intentionally abandoned | `Cancelled` after explicit confirmation | Reason and disposition of partial work |
 
 Do not move an item merely because work is planned. `Changes Requested` means corrections are waiting to be resumed, not active implementation. Never move directly from active implementation to `Done`; require review or validation first.
@@ -148,7 +160,24 @@ Report commands and results exactly. Never claim a check passed when it was not 
 
 ### Changes Requested
 
-Record concrete findings, locations, impact, required corrections, validation performed, and exact conditions for returning to review. Reuse the repository's review process or the `code-review-and-quality` skill when applicable. Do not make risk-acceptance decisions on the user's behalf.
+After review, triage the findings and obtain the required decision for every material finding. Before correcting anything, post a concise traceability comment and reconcile it successfully with the transition to `Changes Requested`. Record accepted corrections with severity, problem or impact, expected result, and required validation. Record each material deferred or dismissed finding with its decision and brief reason. Omit unaccepted nits, informational observations, empty sections, internal reasoning, and conversation transcripts. A clean review with no actionable finding does not receive this comment.
+
+Use a compact structure, rendered as HTML in `comment_html`:
+
+```markdown
+## Review — agreed corrections
+
+### Address
+- [Severity] Problem: expected result.
+
+### Validate
+- Required check.
+
+### Not addressed
+- Material finding: deferred/dismissed — brief reason.
+```
+
+Do not begin corrections until the comment exists and the item is in `Changes Requested`. When corrections actually start, resolve the human performing them, add that member without removing existing assignees, preserve the original start date, move the item to `In Progress`, and read back the assignees, start date, and state. That material start is sufficient and needs no additional human confirmation. Reuse the repository's review process or the `code-review-and-quality` skill when applicable. Do not make risk-acceptance decisions on the user's behalf.
 
 ### Corrections Ready
 
@@ -163,7 +192,7 @@ Record concrete findings, locations, impact, required corrections, validation pe
 
 ### Completion
 
-Before requesting confirmation for `Done`, verify acceptance criteria are demonstrated, required checks passed, review completed, documentation is current, and no known security, privacy, data-loss, or operational blocker remains. When the work delivers versioned changes through a PR, also verify the PR is merged. A temporary spike that intentionally leaves no product changes does not require a PR; verify reproducible evidence and cleanup instead. Record concise evidence after confirmation.
+Before requesting confirmation for `Done`, verify acceptance criteria are demonstrated, required checks passed, review completed, documentation is current, and no known security, privacy, data-loss, or operational blocker remains. When the work delivers versioned changes through a PR, also verify the PR is merged. A temporary spike that intentionally leaves no product changes does not require a PR; verify reproducible evidence and cleanup instead. After confirmation, transition the item and record or verify its actual completion date; never use a target date as completion evidence. Record concise evidence after confirmation.
 
 ### Historical Repair
 
