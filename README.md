@@ -76,6 +76,13 @@ La evaluación siempre se realiza, pero crear o actualizar memoria requiere
 confirmación explícita; un resultado `No memory update` es normal. La skill no
 autoriza commits, pushes, cambios de PR ni merges.
 
+`plane-workitem-development` sincroniza el inicio efectivo con `In Progress`, la
+fecha de inicio y el usuario humano responsable sin retirar responsables previos.
+Antes de corregir una revisión, registra brevemente los hallazgos aceptados y las
+decisiones sobre hallazgos materiales no atendidos; una revisión limpia no genera
+ese comentario. Al cerrar, verifica la fecha real de culminación sin usar la fecha
+objetivo como sustituto.
+
 ## Configuración V2 (`opencode.global.json`)
 
 Es un snapshot fiel de `~/.config/opencode/opencode.json`. Contiene:

@@ -68,6 +68,18 @@ Automatically update states, add comments, and attach PR links when a checkpoint
 
 Before every write, read the relevant Plane data. Make the smallest mutation, preserve unrelated fields, then read back the result. Resolve states by current project data; never hardcode UUIDs or assume every project uses the example names. Suggested state names below are preferences only; if a preferred state does not exist, choose the closest existing state or ask, and never auto-create a missing state.
 
+## Active Work Metadata
+
+Before implementation actually starts, synchronize the work item as one logical checkpoint:
+
+1. Resolve the human who will perform the work to a current Plane project member. Never assign an agent, service account, or inferred identity. Ask one focused question if the human cannot be identified unambiguously.
+2. Add that member as an assignee without removing existing assignees. If the project cannot represent the addition without replacement, ask before changing ownership.
+3. Set the actual start date only when it is empty. Preserve an existing start date, including when review corrections begin.
+4. Move the item to the project's active implementation state, normally `In Progress`.
+5. Read back and verify the assignees, start date, and state before editing code.
+
+When completing work, use Plane's actual completion field or the timestamp produced by transition to the project's completed state. Never substitute `target_date` or another planning date. If Plane sets completion automatically, verify it rather than writing a duplicate value.
+
 ## Atomicity And Idempotency Of Writes
 
 - A state change and its checkpoint comment are separate Plane calls and are not atomic. A transition can succeed while the comment fails, or vice versa.

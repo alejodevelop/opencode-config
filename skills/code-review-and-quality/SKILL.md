@@ -192,6 +192,12 @@ This prevents authors from treating all feedback as mandatory and wasting time o
 
 **Lead with what matters.** Order findings by leverage: correctness and security first, then structural regressions and missed simplifications, then everything else. Don't bury a real issue under cosmetic nits — a few high-conviction comments beat a long list. If you have one structural problem and ten nits, the structural problem *is* the review.
 
+### Step 4a: Produce A Traceable Handoff
+
+For each actionable finding, report severity, location, problem and impact, expected correction, and required validation when applicable. Separate required, optional, and informational findings so the primary agent and human can decide what will be addressed.
+
+The reviewer remains read-only: it neither decides risk acceptance nor writes to Plane. The primary agent owns triage and synchronization. When work is tied to Plane, the primary agent must document accepted findings and material deferrals or dismissals there before corrections begin, following `plane-workitem-development`. Do not copy nits that were not accepted, internal reasoning, or the full review transcript into Plane.
+
 ### Step 5: Verify the Verification
 
 Check the author's verification story:
