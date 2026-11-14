@@ -9,9 +9,10 @@ Deliver the smallest real increment that lets the user exercise the requested be
 
 ## Scope Gate
 
+- Before editing, state scope in at most two short lines: what will change and what nearby area will remain untouched. Omit routine file inventories and Git history.
 - Derive scope only from the request, acceptance criteria, repository constraints, and explicit user decisions.
 - Do not add speculative infrastructure, abstractions, integrations, security schemes, configurability, or future-proofing.
-- Identify unrelated ideas as out of scope; ask before expanding scope.
+- If a necessary change falls outside the stated scope, stop and ask in one sentence naming the change, reason, and risk. History and work items provide context, not permission.
 - Prefer the simplest maintainable solution for the current requirement. Do not abstract for hypothetical reuse.
 
 ## Slice Gate
@@ -28,7 +29,7 @@ For each slice:
 2. Run fresh focused checks and broader repository-required checks.
 3. Never weaken, delete, skip, or rewrite a failing test merely to obtain green. Change it only for a user-approved requirement change or when demonstrably incorrect; explain why first.
 4. Present the behavior, verification evidence, and concise manual test steps.
-5. If UI exists, make it runnable and wait for the user to exercise it. Automated UI tests do not replace this.
+5. If web UI exists, invoke `narrated-browser-review`, make the UI runnable, and wait for the user's instrumented manual review. For other UI, make it runnable and wait for manual review. Automated UI tests do not replace either review.
 6. Wait for explicit approval of this slice before requesting or making its commit. Work-item approval is not blanket commit approval.
 7. After the approved commit, synchronize Plane according to `plane-workitem-development` when applicable.
 8. Repeat with the next smallest slice.
