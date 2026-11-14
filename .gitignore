@@ -42,3 +42,4 @@ logs/
 node_modules/
 bun.lock
 package-lock.json
+narrated-review/
