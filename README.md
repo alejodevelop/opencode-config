@@ -24,13 +24,14 @@ manual. No lo apuntes con `OPENCODE_CONFIG` ni `OPENCODE_CONFIG_DIR`.
 | `skills/grill-me/` | Entrada manual para interrogar y endurecer un plan o diseño |
 | `skills/grilling/` | Entrevista iterativa que resuelve el árbol de decisiones |
 | `skills/incremental-delivery/SKILL.md` | Control de alcance, cortes verticales y aprobación manual por incremento |
+| `skills/narrated-browser-review/SKILL.md` | Pruebas web manuales narradas con video, diagnóstico y pasos reproducibles |
 | `skills/project-memory-gate/` | Gate previo a integración para memoria durable, con política y plantillas |
 | `skills/plane-work-management/SKILL.md` | Gestión de proyectos y work items en Plane |
 | `skills/plane-workitem-development/SKILL.md` | Desarrollo de work items con trazabilidad por commit, PR y merge |
 | `skills/tdd/` | TDD con pruebas de comportamiento y ciclos rojo-verde por cortes verticales |
 | `skills/writing-for-agents/` | Redacción predecible y eficiente de skills e instrucciones para agentes |
 
-Total: 12 skills. Los agentes viven dentro de `opencode.global.json` (no hay
+Total: 13 skills. Los agentes viven dentro de `opencode.global.json` (no hay
 carpeta `agents/` ni `commands/` en este snapshot).
 
 `incremental-delivery` limita cada cambio al comportamiento solicitado, evita
