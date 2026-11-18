@@ -50,7 +50,7 @@ Treat a successfully fetched remote base as the latest stable base unless reposi
 
 Act on Git only within the following limits:
 
-- No commit, push, pull-request creation or update, repository creation or settings change, tag, or release without explicit authorization for that action.
+- No commit, push, pull-request creation or update, repository creation or settings change, tag, or release without explicit authorization for that action. Under `incremental-delivery`, approval of a slice authorizes that slice's commit and push only.
 - An explicit request to implement, correct, or complete the work item authorizes only the branch creation/switch or isolated branch worktree needed to begin that work. No fetch, pull, stash, reset, commit, push, merge, rebase, cherry-pick, PR mutation, branch deletion, or other Git state change is implied. Read-only inspection such as `status`, `diff`, `log`, and remote metadata queries is allowed in advisory mode.
 - No force push, history rewrite (rebase, amend of shared history, reset --hard on published work), or remote branch deletion without specific confirmation of the exact refs and effect.
 - Destructive local commands that could lose uncommitted work require explicit confirmation.
@@ -111,7 +111,7 @@ Use `Blocked` only for an external impediment or unresolved dependency. Review d
 Automatic AI comments are allowed only for:
 
 1. **Each approved commit:** after manual approval and commit creation, post the commit hash or link, behavior delivered, automated verification and result, and confirmation of manual approval.
-2. **PR handoff:** post the PR link, consolidated scope, validation evidence, and next review action.
+2. **PR handoff:** after every planned slice for the work item is approved and validated, post the work item's single PR link, consolidated scope, validation evidence, and next review action.
 3. **Confirmed merge:** post the merged PR or integration reference and final outcome.
 
 Do not automatically comment starts, plans, intermediate progress, discoveries, spikes, red-green steps, test runs, transient attempts, or blockers. Report blockers in conversation; write them to Plane only on explicit user instruction. Add customer context, product notes, or other discretionary information only when explicitly instructed.
@@ -149,6 +149,8 @@ Report commands and results exactly. Never claim a check passed when it was not 
 After confirming the PR merged, post the PR or integration reference and final outcome. Ask before moving the item to `Done`, as required by the state checkpoint.
 
 ## PR Registration
+
+Use one PR per work item. Create and hand it off after all planned slices are approved, committed, pushed, and validated. If a PR already exists, intermediate slice pushes may update its branch, but keep the item active and defer handoff until the final slice.
 
 When a PR is created or discovered for the work item:
 

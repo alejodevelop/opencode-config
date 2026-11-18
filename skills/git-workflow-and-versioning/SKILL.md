@@ -95,7 +95,7 @@ update auth.ts
 
 ### 4. Keep Concerns Separate
 
-Don't combine formatting changes with behavior changes. Don't combine refactors with features. Each type of change should be a separate commit — and ideally a separate PR:
+Don't combine formatting changes with behavior changes. Don't combine refactors with features. Use separate commits for separate concerns; related commits may share the work item's single PR:
 
 ```
 # Good: Separate concerns
