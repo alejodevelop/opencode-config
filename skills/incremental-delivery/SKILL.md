@@ -30,15 +30,19 @@ For each slice:
 3. Never weaken, delete, skip, or rewrite a failing test merely to obtain green. Change it only for a user-approved requirement change or when demonstrably incorrect; explain why first.
 4. Present the behavior, verification evidence, and concise manual test steps.
 5. If web UI exists, invoke `narrated-browser-review`, make the UI runnable, and wait for the user's instrumented manual review. For other UI, make it runnable and wait for manual review. Automated UI tests do not replace either review.
-6. Wait for explicit approval of this slice before requesting or making its commit. Work-item approval is not blanket commit approval.
-7. After the approved commit, synchronize Plane according to `plane-workitem-development` when applicable.
-8. Repeat with the next smallest slice.
+6. Wait for explicit approval of this slice. That approval authorizes its commit and push to the work-item branch; work-item approval alone does not.
+7. After the approved commit and push, synchronize Plane according to `plane-workitem-development` when applicable.
+8. Repeat on the same branch until every planned slice for the work item is approved and validated.
 
 Do not continue while approval or corrections are pending. Report blockers to the user; do not write them to Plane unless explicitly requested.
+
+## Work-Item PR Boundary
+
+Use one PR per work item. Create and hand off that PR only after every planned slice is approved, committed, pushed, and validated. If a PR already exists, pushes may update its branch during the loop, but handoff and review wait until the final slice. A request spanning independent work items uses one branch and PR per work item.
 
 ## Approval Request
 
 - **Implemented:** observable behavior.
 - **Verified:** commands or checks and results.
 - **Try it:** exact manual test steps.
-- **Awaiting:** explicit approval to commit, or corrections.
+- **Awaiting:** explicit approval to commit and push, or corrections.

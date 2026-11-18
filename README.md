@@ -37,10 +37,12 @@ carpeta `agents/` ni `commands/` en este snapshot).
 infraestructura o abstracciones especulativas y prioriza cortes verticales que el
 usuario pueda probar pronto. Invoca `tdd` para comportamientos automatizables y
 exige aprobación manual del incremento antes de cada commit, incluso cuando
-existen pruebas automáticas de interfaz.
+existen pruebas automáticas de interfaz. Esa aprobación autoriza el commit y push
+del corte a la misma rama; el único PR del work item se entrega cuando todos sus
+cortes están aprobados y validados.
 
 `plane-workitem-development` restringe los comentarios automáticos de IA a cada
-commit probado y aprobado, la entrega del PR y el merge confirmado. Bloqueos,
+commit probado y aprobado, la entrega final del único PR del work item y el merge confirmado. Bloqueos,
 notas de cliente y demás contexto solo se escriben cuando el usuario lo solicita.
 
 `grilling` conduce rondas de preguntas hasta cerrar las decisiones de un plan
@@ -77,10 +79,9 @@ autoriza commits, pushes, cambios de PR ni merges.
 
 `plane-workitem-development` sincroniza el inicio efectivo con `In Progress`, la
 fecha de inicio y el usuario humano responsable sin retirar responsables previos.
-Antes de corregir una revisión, registra brevemente los hallazgos aceptados y las
-decisiones sobre hallazgos materiales no atendidos; una revisión limpia no genera
-ese comentario. Al cerrar, verifica la fecha real de culminación sin usar la fecha
-objetivo como sustituto.
+Los hallazgos de revisión se reportan en la conversación; solo se registran en
+Plane cuando el usuario lo solicita. Al cerrar, verifica la fecha real de
+culminación sin usar la fecha objetivo como sustituto.
 
 ## Configuración V2 (`opencode.global.json`)
 
