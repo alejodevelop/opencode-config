@@ -21,7 +21,6 @@ manual. No lo apuntes con `OPENCODE_CONFIG` ni `OPENCODE_CONFIG_DIR`.
 | `skills/code-review-and-quality/SKILL.md` | Revisión de código multi-eje antes de mergear |
 | `skills/find-skills/SKILL.md` | Descubrir e instalar skills |
 | `skills/git-workflow-and-versioning/SKILL.md` | Flujo Git, commits, PRs, releases |
-| `skills/grill-me/` | Entrada manual para interrogar y endurecer un plan o diseño |
 | `skills/grilling/` | Entrevista iterativa que resuelve el árbol de decisiones |
 | `skills/incremental-delivery/SKILL.md` | Control de alcance, cortes verticales y aprobación manual por incremento |
 | `skills/narrated-browser-review/SKILL.md` | Pruebas web manuales narradas con video, diagnóstico y pasos reproducibles |
@@ -31,7 +30,7 @@ manual. No lo apuntes con `OPENCODE_CONFIG` ni `OPENCODE_CONFIG_DIR`.
 | `skills/tdd/` | TDD con pruebas de comportamiento y ciclos rojo-verde por cortes verticales |
 | `skills/writing-for-agents/` | Redacción predecible y eficiente de skills e instrucciones para agentes |
 
-Total: 13 skills. Los agentes viven dentro de `opencode.global.json` (no hay
+Total: 12 skills. Los agentes viven dentro de `opencode.global.json` (no hay
 carpeta `agents/` ni `commands/` en este snapshot).
 
 `incremental-delivery` limita cada cambio al comportamiento solicitado, evita
@@ -44,11 +43,10 @@ existen pruebas automáticas de interfaz.
 commit probado y aprobado, la entrega del PR y el merge confirmado. Bloqueos,
 notas de cliente y demás contexto solo se escriben cuando el usuario lo solicita.
 
-`grill-me` es la entrada manual y delega en `grilling`, que conduce rondas de
-preguntas hasta cerrar las decisiones de un plan antes de implementar. No
-escribe memoria del proyecto: `project-memory-gate` conserva su función
-separada antes de integrar trabajo validado. Ambas copias provienen de
-[`mattpocock/skills`](https://github.com/mattpocock/skills), revisión
+`grilling` conduce rondas de preguntas hasta cerrar las decisiones de un plan
+antes de implementar. No escribe memoria del proyecto: `project-memory-gate`
+conserva su función separada antes de integrar trabajo validado. La copia
+proviene de [`mattpocock/skills`](https://github.com/mattpocock/skills), revisión
 `5beb35b040e3de97e54fa9e386d7e42d15c295c2`.
 
 `writing-for-agents` es la versión vigente de la antigua
@@ -98,14 +96,16 @@ Es un snapshot fiel de `~/.config/opencode/opencode.json`. Contiene:
   - `explore` (subagent) — exploración de solo lectura.
   - `reviewer` (subagent) — revisión **estrictamente de solo lectura**.
   - `title` — generación de títulos.
-- **Proveedor** (`providers.omniroute`): endpoint local
-  `http://127.0.0.1:20131/v1`, con la credencial referenciada como
-  `{file:~/.config/opencode/omniroute.key}`. **Nunca se copia el valor de la
+- **Proveedor** (`providers.9router`): endpoint local
+  `http://127.0.0.1:20128/v1`, con la credencial referenciada como
+  `{file:~/.config/opencode/9router.key}`. **Nunca se copia el valor de la
   clave.**
-- **Modelos** declarados: `cx/gpt-5.6-sol` y `opencode-go/deepseek-flash`.
-- **MCP** (`mcp.servers`): dos servidores remotos por OAuth:
-  - `plane` → `https://mcp.plane.so/http/mcp`
+- **Modelos** declarados: `cx/gpt-5.6-sol`, `cx/gpt-6-luna`,
+  `ocg/deepseek-flash` y `ocg/muse-spark-1.3-contributor`.
+- **MCP** (`mcp.servers`): tres servidores remotos por OAuth:
+  - `plane-ottcomputer` → `https://mcp.plane.so/http/mcp`
   - `context7` → `https://mcp.context7.com/mcp/oauth`
+  - `gitea-ottcomputer` → `https://mcp-gitea-ott.skysoluciones.com/mcp`
 
 El archivo solo referencia credenciales; no contiene tokens, estado OAuth ni
 secretos.
@@ -114,9 +114,9 @@ secretos.
 
 - OpenCode V2 instalado (`opencode --version`).
 - Un endpoint compatible con OpenAI accesible en la URL configurada
-  (`http://127.0.0.1:20131/v1` en este snapshot). Ajusta `providers.omniroute`
+  (`http://127.0.0.1:20128/v1` en este snapshot). Ajusta `providers.9router`
   si tu endpoint es distinto.
-- Acceso de red a los servidores MCP de Plane y Context7.
+- Acceso de red a los servidores MCP de Plane, Context7 y Gitea.
 
 ## Instalación segura en otra máquina
 
@@ -130,10 +130,10 @@ secretos.
    shell ni en el repositorio. Por ejemplo, escríbelo con un editor y permisos
    restringidos:
    ```bash
-   install -m 600 /dev/null ~/.config/opencode/omniroute.key
+   install -m 600 /dev/null ~/.config/opencode/9router.key
    # edita el archivo y pega la clave como única línea, sin comillas
    ```
-   La clave vive **solo** en `~/.config/opencode/omniroute.key`; nunca en este
+   La clave vive **solo** en `~/.config/opencode/9router.key`; nunca en este
    repo.
 4. Copia las skills que quieras a la ruta global de skills:
    ```bash
@@ -142,12 +142,13 @@ secretos.
    ```
 5. Autentica los servidores MCP remotos por OAuth (abre el navegador):
    ```bash
-   opencode mcp auth plane
+   opencode mcp auth plane-ottcomputer
    opencode mcp auth context7
+   opencode mcp auth gitea-ottcomputer
    ```
 6. Verifica la instalación:
    ```bash
-   opencode mcp list          # debe mostrar plane y context7 como connected
+   opencode mcp list          # debe mostrar los tres servidores como connected
    opencode debug config      # muestra las fuentes de configuración
    opencode debug agents      # lista los agentes cargados
    ```
@@ -161,7 +162,7 @@ Este snapshot es deliberadamente parcial. **Nunca** copies ni versiones:
 - `service.json` y cualquier secreto de servicio.
 - Backups (`*.bak`, `snapshot/`).
 - Bases de datos (`opencode.db`, `*.sqlite`, `*.db-wal`/`-shm`), logs y cachés.
-- El valor de `omniroute.key` y cualquier clave privada o material criptográfico.
+- El valor de `9router.key` y cualquier clave privada o material criptográfico.
 
 La instalación global de cada máquina sigue siendo la fuente de verdad; este
 repo es solo una copia de referencia sanitizada.
