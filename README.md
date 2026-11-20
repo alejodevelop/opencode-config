@@ -4,6 +4,7 @@ Configuraciones globales de OpenCode V2 y Codex CLI, listas para instalar
 manualmente y sin credenciales. Elige el cliente que quieras usar:
 
 - [Configurar OpenCode](#configurar-opencode): usa OmniRoute como proveedor.
+- [Acceso móvil y revisión grabada en Windows + WSL](docs/revision-movil-wsl.md): retoma OpenCode y prueba una app desde Android sin perder la captura.
 - [Configurar Codex CLI](#configurar-codex-cli): usa OpenAI directamente con tu cuenta de ChatGPT.
 - [Instalar las skills compartidas](#instalar-las-skills-compartidas): sirve para cualquiera de los dos, sin instalar el otro.
 
