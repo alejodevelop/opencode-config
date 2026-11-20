@@ -85,7 +85,7 @@ culminación sin usar la fecha objetivo como sustituto.
 
 ## Configuración V2 (`opencode.global.json`)
 
-Es un snapshot fiel de `~/.config/opencode/opencode.json`. Contiene:
+Es un snapshot sanitizado de `~/.config/opencode/opencode.json`. Contiene:
 
 - `$schema`: `https://opencode.ai/config.json`.
 - `model` por defecto y `default_agent: "build"`.
@@ -97,12 +97,12 @@ Es un snapshot fiel de `~/.config/opencode/opencode.json`. Contiene:
   - `explore` (subagent) — exploración de solo lectura.
   - `reviewer` (subagent) — revisión **estrictamente de solo lectura**.
   - `title` — generación de títulos.
-- **Proveedor** (`providers.9router`): endpoint local
-  `http://127.0.0.1:20128/v1`, con la credencial referenciada como
-  `{file:~/.config/opencode/9router.key}`. **Nunca se copia el valor de la
+- **Proveedor** (`providers.omniroute`): endpoint local
+  `http://127.0.0.1:20131/v1`, con la credencial referenciada como
+  `{file:~/.config/opencode/omniroute.key}`. **Nunca se copia el valor de la
   clave.**
-- **Modelos** declarados: `cx/gpt-5.6-sol`, `cx/gpt-6-luna`,
-  `ocg/deepseek-flash` y `ocg/muse-spark-1.3-contributor`.
+- **Modelos**: `cx/gpt-6.2-sol-high` (predeterminado, `build`, `plan` y
+  `reviewer`) y `cx/gpt-6.2-sol-medium` (`general`, `explore` y `title`).
 - **MCP** (`mcp.servers`): tres servidores remotos por OAuth:
   - `plane-ottcomputer` → `https://mcp.plane.so/http/mcp`
   - `context7` → `https://mcp.context7.com/mcp/oauth`
@@ -115,7 +115,7 @@ secretos.
 
 - OpenCode V2 instalado (`opencode --version`).
 - Un endpoint compatible con OpenAI accesible en la URL configurada
-  (`http://127.0.0.1:20128/v1` en este snapshot). Ajusta `providers.9router`
+  (`http://127.0.0.1:20131/v1` en este snapshot). Ajusta `providers.omniroute`
   si tu endpoint es distinto.
 - Acceso de red a los servidores MCP de Plane, Context7 y Gitea.
 
@@ -131,10 +131,10 @@ secretos.
    shell ni en el repositorio. Por ejemplo, escríbelo con un editor y permisos
    restringidos:
    ```bash
-   install -m 600 /dev/null ~/.config/opencode/9router.key
+   install -m 600 /dev/null ~/.config/opencode/omniroute.key
    # edita el archivo y pega la clave como única línea, sin comillas
    ```
-   La clave vive **solo** en `~/.config/opencode/9router.key`; nunca en este
+   La clave vive **solo** en `~/.config/opencode/omniroute.key`; nunca en este
    repo.
 4. Copia las skills que quieras a la ruta global de skills:
    ```bash
@@ -163,7 +163,7 @@ Este snapshot es deliberadamente parcial. **Nunca** copies ni versiones:
 - `service.json` y cualquier secreto de servicio.
 - Backups (`*.bak`, `snapshot/`).
 - Bases de datos (`opencode.db`, `*.sqlite`, `*.db-wal`/`-shm`), logs y cachés.
-- El valor de `9router.key` y cualquier clave privada o material criptográfico.
+- El valor de `omniroute.key` y cualquier clave privada o material criptográfico.
 
 La instalación global de cada máquina sigue siendo la fuente de verdad; este
 repo es solo una copia de referencia sanitizada.

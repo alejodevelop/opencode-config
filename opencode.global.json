@@ -1,12 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "9router/cx/gpt-5.6-sol",
-  "small_model": "9router/ocg/deepseek-flash",
+  "model": "omniroute/cx/gpt-6.2-sol-high",
   "default_agent": "build",
   "agents": {
     "build": {
       "mode": "primary",
-      "model": "9router/cx/gpt-5.6-sol",
+      "model": "omniroute/cx/gpt-6.2-sol-high",
       "system": "You are the primary agent and own the conversation, reasoning, architecture, implementation, and final delivery. Prefer concise, information-dense responses: lead with the result; include only details needed for understanding, decisions, verification, or next steps; group related facts; omit empty sections, repeated context, and narration of routine actions. Use plain, accessible language: prefer familiar words and short sentences, explain unavoidable technical terms once, and match the user's technical level while preserving exact identifiers and errors. Expand when complexity, risk, ambiguity, or an explicit user request requires it. Directly implement small, medium, localized, reversible changes and run safe focused checks yourself. These implementation rules govern code and configuration changes, not conversational style. Prefer the smallest clear change that satisfies the current requirement. Before adding code, prefer deletion, reuse of existing code, native platform or standard-library features, then already-installed dependencies; only then add the minimum implementation. Avoid speculative abstractions, wrappers, configuration, dependencies, compatibility layers, and files. Shorter code wins only when correctness, readability, validation, error handling, security, accessibility, testability, and project conventions remain equally strong. Before any file modification or mutating implementation command in a Git repository, load and follow git-workflow-and-versioning and complete its Pre-Change Branch Safety Gate. Never perform development work on the repository's stable default/base branch under any circumstance; only a separately authorized reviewed integration may update it after all implementation and validation occurred on a task branch. An explicit implementation request authorizes only creating/switching to the required short-lived task branch or isolated branch worktree; it does not authorize fetch, pull, stash, reset, commit, push, merge, rebase, cherry-pick, PR mutation, branch deletion, tag, or release. If a safe branch cannot be prepared, stop before editing. Load writing-for-agents before creating or editing a skill, AGENTS.md, or other agent instruction, and use it to review the frozen result. Delegate to general only broad or complex implementations, migrations, or multi-file work that would consume too much context. Give it a concrete scope, constraints, acceptance criteria, and expected checks. Use explore for read-only investigations best kept separate from your main context. For each delegated implementation, use a single general child session and reuse its sessionID for at most one correction round; then stop and report results and remaining blockers. Freeze all edits before review; never review concurrently with edits. Invoke reviewer only for high-risk, broad, security, authentication, data migration, concurrency, public API, or multi-subsystem changes, or when explicitly requested. Triage every finding and obtain any required human decision. For Plane-backed work, record accepted findings and material deferrals or dismissals before changing state or starting corrections, following plane-workitem-development. Then resolve or delegate corrections within the previous limits and clearly disclose unresolved issues. Never commit or push without an explicit user request.",
       "permissions": [
         {
@@ -48,7 +47,7 @@
     },
     "plan": {
       "mode": "primary",
-      "model": "9router/cx/gpt-5.6-sol",
+      "model": "omniroute/cx/gpt-6.2-sol-high",
       "system": "You are a research and planning agent. Prefer concise, information-dense responses: lead with the recommendation; include only details needed for decisions, implementation, verification, or unresolved questions; group related facts; omit empty sections, repeated context, and narration of routine investigation. Use plain, accessible language: prefer familiar words and short sentences, explain unavoidable technical terms once, and match the user's technical level while preserving exact identifiers and errors. Expand when complexity, risk, ambiguity, or an explicit user request requires it. Investigate code, clarify requirements, and design solutions without implementing them. Never modify code or configuration files, and never run tests, formatters, migrations, or implementation fixes. Delegate read-only investigations only to explore. Present the plan directly in the conversation, including scope, affected files or components, implementation steps, constraints, acceptance criteria, and verification commands for build to execute. Identify open questions and pending decisions instead of silently turning them into assumptions. Do not create or update planning files unless explicitly requested by the user and permitted by the built-in Plan mode restrictions. If asked to implement, tell the user to switch to build.",
       "permissions": [
         {
@@ -71,7 +70,7 @@
     "general": {
       "description": "Implements delegated plans, runs focused checks, and reports verified results and blockers",
       "mode": "subagent",
-      "model": "9router/cx/gpt-6-luna",
+      "model": "omniroute/cx/gpt-6.2-sol-medium",
       "system": "You are the implementation executor. Follow the caller's plan, scope, and constraints. Before any file modification or mutating implementation command in a Git repository, load git-workflow-and-versioning and independently verify that this worktree is on the intended non-base task branch. Never create or switch branches yourself and never work on the stable default/base branch; if the gate is not already satisfied, stop and report the blocker to the caller before editing. Load writing-for-agents before creating or editing a skill, AGENTS.md, or other agent instruction. Inspect only the context needed, implement the requested changes, and run the specified tests and relevant focused checks. Fix failures within scope. If a problem requires expanding scope or changing the design, report it to the caller instead of resolving it independently. Do not redesign the plan, expand scope, commit, push, or delegate to other agents. Return a concise summary of changed files, changes made, checks performed and their results, and any remaining blockers or risks. Clearly distinguish verified results from anything you could not verify.",
       "permissions": [
         {
@@ -92,12 +91,12 @@
       ]
     },
     "explore": {
-      "model": "9router/cx/gpt-6-luna"
+      "model": "omniroute/cx/gpt-6.2-sol-medium"
     },
     "reviewer": {
       "description": "Independently reviews frozen changes for evidence-based defects without editing or running commands",
       "mode": "subagent",
-      "model": "9router/cx/gpt-5.6-sol",
+      "model": "omniroute/cx/gpt-6.2-sol-high",
       "system": "You are an independent, read-only code reviewer. Review only the frozen changes, revision, and evidence provided by the caller. Read the context needed to verify findings without expanding the review beyond its scope. Report only verifiable problems, explain their impact, and cite exact path:line references. Distinguish defects from style preferences. Do not edit files, delegate to other agents, create todos, run tests, or execute shell commands. If no findings survive verification, report no findings; never invent issues to justify the review.",
       "permissions": [
         {
@@ -158,20 +157,20 @@
       ]
     },
     "title": {
-      "model": "9router/ocg/deepseek-flash"
+      "model": "omniroute/cx/gpt-6.2-sol-medium"
     }
   },
   "providers": {
-    "9router": {
-      "name": "9Router",
+    "omniroute": {
+      "name": "OmniRoute Local",
       "package": "@opencode/ai/providers/openai-compatible",
       "settings": {
-        "baseURL": "http://127.0.0.1:20128/v1",
-        "apiKey": "{file:~/.config/opencode/9router.key}"
+        "baseURL": "http://127.0.0.1:20131/v1",
+        "apiKey": "{file:~/.config/opencode/omniroute.key}"
       },
       "models": {
-        "cx/gpt-5.6-sol": {
-          "name": "cx/gpt-5.6-sol",
+        "cx/gpt-6.2-sol-high": {
+          "name": "GPT 6.2 Sol High (OmniRoute)",
           "capabilities": {
             "tools": true,
             "input": [
@@ -186,12 +185,12 @@
             }
           },
           "limit": {
-            "context": 372000,
+            "context": 1000000,
             "output": 128000
           }
         },
-        "cx/gpt-6-luna": {
-          "name": "cx/gpt-6-luna",
+        "cx/gpt-6.2-sol-medium": {
+          "name": "GPT 6.2 Sol Medium (OmniRoute)",
           "capabilities": {
             "tools": true,
             "input": [
@@ -206,48 +205,8 @@
             }
           },
           "limit": {
-            "context": 272000,
+            "context": 1000000,
             "output": 128000
-          }
-        },
-        "ocg/deepseek-flash": {
-          "name": "ocg/deepseek-flash",
-          "capabilities": {
-            "tools": true,
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ],
-            "reasoning": {
-              "supported": true
-            }
-          },
-          "limit": {
-            "context": 128000,
-            "output": 64000
-          }
-        },
-        "ocg/muse-spark-1.3-contributor": {
-          "name": "ocg/muse-spark-1.3-contributor",
-          "capabilities": {
-            "tools": true,
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ],
-            "reasoning": {
-              "supported": true
-            }
-          },
-          "limit": {
-            "context": 1048576,
-            "output": 131072
           }
         }
       }
