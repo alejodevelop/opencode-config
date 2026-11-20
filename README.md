@@ -1,268 +1,136 @@
 # opencode-config
 
-Snapshot **portable y sanitizado** de mi configuración global de OpenCode (V2),
-con plantillas separadas para reproducir el flujo en Codex CLI. OpenCode sigue
-usando OmniRoute; instalar las plantillas de Codex no lo modifica.
+Configuraciones globales de OpenCode V2 y Codex CLI, listas para instalar
+manualmente y sin credenciales. Elige el cliente que quieras usar:
 
-**Este repositorio NO se carga automáticamente.** La fuente de verdad es la
-instalación de cada cliente. Para OpenCode:
+- [Configurar OpenCode](#configurar-opencode): usa OmniRoute como proveedor.
+- [Configurar Codex CLI](#configurar-codex-cli): usa OpenAI directamente con tu cuenta de ChatGPT.
+- [Instalar las skills compartidas](#instalar-las-skills-compartidas): sirve para cualquiera de los dos, sin instalar el otro.
 
-- `~/.config/opencode/opencode.json` — configuración global.
-- `~/.agents/skills/` — skills instaladas para los agentes.
+Ejecuta los comandos de copia desde la raíz del repositorio. No apuntes
+`OPENCODE_CONFIG`, `OPENCODE_CONFIG_DIR` ni `CODEX_HOME` al checkout: las
+credenciales y el estado local deben quedar fuera de Git.
 
-Este repo contiene plantillas para revisión e instalación manual. No apuntes
-`OPENCODE_CONFIG`, `OPENCODE_CONFIG_DIR` ni `CODEX_HOME` al repo.
+## Configurar OpenCode
 
-## Contenido
+Necesitas [OpenCode V2](https://opencode.ai/docs/) y una instancia de OmniRoute
+con acceso a los modelos `cx/gpt-6.2-sol-high` y `cx/gpt-6.2-sol-medium`.
 
-| Archivo / directorio | Qué es |
-|---|---|
-| `opencode.global.json` | Snapshot sanitizado de `~/.config/opencode/opencode.json` |
-| `codex/` | Plantillas globales para un `CODEX_HOME` separado: `config.toml`, `AGENTS.md` y `agents/` |
-| `skills/agent-browser/SKILL.md` | Automatización de navegador para agentes |
-| `skills/code-review-and-quality/SKILL.md` | Revisión de código multi-eje antes de mergear |
-| `skills/find-skills/SKILL.md` | Descubrir e instalar skills |
-| `skills/git-workflow-and-versioning/SKILL.md` | Flujo Git, commits, PRs, releases |
-| `skills/grilling/` | Entrevista iterativa que resuelve el árbol de decisiones |
-| `skills/incremental-delivery/SKILL.md` | Control de alcance, cortes verticales y aprobación manual por incremento |
-| `skills/narrated-browser-review/SKILL.md` | Pruebas web manuales narradas con video, diagnóstico y pasos reproducibles |
-| `skills/project-memory-gate/` | Gate previo a integración para memoria durable, con política y plantillas |
-| `skills/plane-work-management/SKILL.md` | Gestión de proyectos y work items en Plane |
-| `skills/plane-workitem-development/SKILL.md` | Desarrollo de work items con trazabilidad por commit, PR y merge |
-| `skills/tdd/` | TDD con pruebas de comportamiento y ciclos rojo-verde por cortes verticales |
-| `skills/writing-for-agents/` | Redacción predecible y eficiente de skills e instrucciones para agentes |
+1. Copia `opencode.global.json` a `~/.config/opencode/opencode.json`. Si ya
+   tienes un `opencode.json` o `opencode.jsonc` en esa carpeta, integra los
+   ajustes del snapshot en el archivo existente en vez de crear otro o
+   reemplazarlo. Para una instalación nueva:
 
-Total: 12 skills. Los agentes viven dentro de `opencode.global.json` (no hay
-carpeta `agents/` ni `commands/` en este snapshot).
-
-`incremental-delivery` limita cada cambio al comportamiento solicitado, evita
-infraestructura o abstracciones especulativas y prioriza cortes verticales que el
-usuario pueda probar pronto. Invoca `tdd` para comportamientos automatizables y
-exige aprobación manual del incremento antes de cada commit, incluso cuando
-existen pruebas automáticas de interfaz. Esa aprobación autoriza el commit y push
-del corte a la misma rama; el único PR del work item se entrega cuando todos sus
-cortes están aprobados y validados.
-
-`plane-workitem-development` restringe los comentarios automáticos de IA a cada
-commit probado y aprobado, la entrega final del único PR del work item y el merge confirmado. Bloqueos,
-notas de cliente y demás contexto solo se escriben cuando el usuario lo solicita.
-
-`grilling` conduce rondas de preguntas hasta cerrar las decisiones de un plan
-antes de implementar. No escribe memoria del proyecto: `project-memory-gate`
-conserva su función separada antes de integrar trabajo validado. La copia
-proviene de [`mattpocock/skills`](https://github.com/mattpocock/skills), revisión
-`5beb35b040e3de97e54fa9e386d7e42d15c295c2`.
-
-`writing-for-agents` es la versión vigente de la antigua
-`writing-great-skills`. Se conserva completa desde
-[`mattpocock/skills`](https://github.com/mattpocock/skills) y se usa como
-referencia al crear, editar y revisar skills, `AGENTS.md` e instrucciones para
-agentes. `build` y `plan` también priorizan respuestas concisas y densas en
-información, ampliándolas solo cuando la complejidad, el riesgo o el usuario lo
-requieren. La copia actual proviene de la revisión upstream
-`5beb35b040e3de97e54fa9e386d7e42d15c295c2`; antes de actualizarla se revisa
-el diff contra esa procedencia.
-
-`git-workflow-and-versioning` impone un gate antes de la primera modificación:
-nunca se edita ni se ejecutan comandos mutantes de implementación sobre la
-rama base estable.
-Cada tarea usa una rama corta creada desde esa base, incluso documentación,
-hotfixes y cambios triviales. Pedir una implementación autoriza únicamente
-crear/cambiar a esa rama o preparar un worktree aislado; no autoriza fetch,
-commit, push, merge, cherry-pick, cambios de PR ni otras mutaciones Git. Solo
-una integración revisada y autorizada por separado puede actualizar la base.
-
-`project-memory-gate` se evalúa antes de integrar trabajo terminado en la rama
-base real del repositorio. Analiza si el cambio contiene conocimiento durable
-que no pueda inferirse de forma fiable desde código, pruebas y configuración.
-La evaluación siempre se realiza, pero crear o actualizar memoria requiere
-confirmación explícita; un resultado `No memory update` es normal. La skill no
-autoriza commits, pushes, cambios de PR ni merges.
-
-`plane-workitem-development` sincroniza el inicio efectivo con `In Progress`, la
-fecha de inicio y el usuario humano responsable sin retirar responsables previos.
-Los hallazgos de revisión se reportan en la conversación; solo se registran en
-Plane cuando el usuario lo solicita. Al cerrar, verifica la fecha real de
-culminación sin usar la fecha objetivo como sustituto.
-
-## Configuración V2 (`opencode.global.json`)
-
-Es un snapshot sanitizado de `~/.config/opencode/opencode.json`. Contiene:
-
-- `$schema`: `https://opencode.ai/config.json`.
-- `model` por defecto y `default_agent: "build"`.
-- **Agentes** (`agents`):
-  - `build` (primary) — orquesta, implementa cambios pequeños y **es el único
-    que muta Plane y Git**.
-  - `plan` (primary) — investigación y diseño, sin editar código ni ejecutar shell.
-  - `general` (subagent) — ejecutor de implementaciones delegadas.
-  - `explore` (subagent) — exploración de solo lectura.
-  - `reviewer` (subagent) — revisión **estrictamente de solo lectura**.
-  - `title` — generación de títulos.
-- **Proveedor** (`providers.omniroute`): endpoint local
-  `http://127.0.0.1:20131/v1`, con la credencial referenciada como
-  `{file:~/.config/opencode/omniroute.key}`. **Nunca se copia el valor de la
-  clave.**
-- **Modelos**: `cx/gpt-6.2-sol-high` (predeterminado, `build`, `plan` y
-  `reviewer`) y `cx/gpt-6.2-sol-medium` (`general`, `explore` y `title`).
-- **MCP** (`mcp.servers`): tres servidores remotos por OAuth:
-  - `plane-ottcomputer` → `https://mcp.plane.so/http/mcp`
-  - `context7` → `https://mcp.context7.com/mcp/oauth`
-  - `gitea-ottcomputer` → `https://mcp-gitea-ott.skysoluciones.com/mcp`
-
-El archivo solo referencia credenciales; no contiene tokens, estado OAuth ni
-secretos.
-
-## Requisitos previos
-
-- OpenCode V2 instalado (`opencode --version`).
-- Un endpoint compatible con OpenAI accesible en la URL configurada
-  (`http://127.0.0.1:20131/v1` en este snapshot). Ajusta `providers.omniroute`
-  si tu endpoint es distinto.
-- Acceso de red a los servidores MCP de Plane, Context7 y Gitea.
-
-## Instalación segura en otra máquina
-
-1. Instala OpenCode V2.
-2. Copia el snapshot a la ruta global:
    ```bash
-   mkdir -p ~/.config/opencode
-   cp opencode.global.json ~/.config/opencode/opencode.json
+   opencode_dir="$HOME/.config/opencode"
+   if [ -e "$opencode_dir/opencode.json" ] || [ -L "$opencode_dir/opencode.json" ] ||
+      [ -e "$opencode_dir/opencode.jsonc" ] || [ -L "$opencode_dir/opencode.jsonc" ]; then
+     printf '%s\n' 'Ya hay una configuración de OpenCode; integra el snapshot a mano.'
+   else
+     mkdir -p "$opencode_dir" &&
+       (set -C; cat < opencode.global.json > "$opencode_dir/opencode.json")
+   fi
    ```
-3. Crea el archivo de credencial **sin exponer el valor** en el historial de
-   shell ni en el repositorio. Por ejemplo, escríbelo con un editor y permisos
-   restringidos:
+
+2. En tu configuración instalada, deja `providers.omniroute` apuntando a
+   `http://127.0.0.1:20131/v1` o ajusta la URL a la de tu instancia. Guarda la
+   clave de OmniRoute en `~/.config/opencode/omniroute.key`, en una sola línea
+   y sin comillas, con permisos `600`. No pongas la clave en el JSON ni en Git.
+3. [Instala las skills compartidas](#instalar-las-skills-compartidas).
+4. Si quieres usar los MCP incluidos, autentica los que necesites. Configura
+   `"disabled": true` en cada entrada de `mcp.servers` que no vayas a usar.
+
    ```bash
-   install -m 600 /dev/null ~/.config/opencode/omniroute.key
-   # edita el archivo y pega la clave como única línea, sin comillas
-   ```
-   La clave vive **solo** en `~/.config/opencode/omniroute.key`; nunca en este
-   repo.
-4. Copia las skills que quieras a la ruta global de skills:
-   ```bash
-   mkdir -p ~/.agents/skills
-   cp -r skills/<nombre> ~/.agents/skills/
-   ```
-5. Autentica los servidores MCP remotos por OAuth (abre el navegador):
-   ```bash
-   opencode mcp auth plane-ottcomputer
    opencode mcp auth context7
+   opencode mcp auth plane-ottcomputer
    opencode mcp auth gitea-ottcomputer
    ```
-6. Verifica la instalación:
+
+5. Verifica que OpenCode cargue la configuración y los agentes del snapshot:
+
    ```bash
-   opencode mcp list          # debe mostrar los tres servidores como connected
-   opencode debug config      # muestra las fuentes de configuración
-   opencode debug agents      # lista los agentes cargados
+   opencode debug config
+   opencode debug agents
+   opencode mcp list
    ```
 
-## Probar el flujo en Codex CLI sin cambiar OpenCode
+   `build` es el agente predeterminado. `build`, `plan` y `reviewer` usan
+   Sol High; `general`, `explore` y `title` usan Sol Medium.
 
-Validado localmente con Codex CLI 0.171.0. En Linux, sigue los [requisitos del
-sandbox](https://learn.chatgpt.com/docs/sandboxing#prerequisites) para
-`bubblewrap`. Necesitas una cuenta de ChatGPT con acceso a GPT‑6.2 Sol.
-Las plantillas usan el proveedor directo de OpenAI con inicio de sesión de
-ChatGPT, no la clave de OmniRoute ni una clave de API de OpenAI.
+## Configurar Codex CLI
 
-Desde la raíz de este repo, crea un directorio **nuevo** para la prueba. No
-apuntes `CODEX_HOME` al repo ni copies estas plantillas sobre una instalación
-existente. Usa la misma sesión de Bash para los bloques de abajo:
+Necesitas [Codex CLI](https://github.com/openai/codex#installing-and-running-codex-cli)
+(configuración validada con 0.171.0) y una cuenta de ChatGPT con acceso a
+GPT‑6.2 Sol. En Linux, comprueba los [requisitos del sandbox](https://learn.chatgpt.com/docs/sandboxing#prerequisites).
+No necesitas OpenCode, OmniRoute ni una clave de API de OpenAI.
+
+1. Instala los archivos de `codex/` en `~/.codex/`. Si ya usas un `CODEX_HOME`
+   personalizado, usa ese directorio en su lugar y mantén la variable definida
+   al ejecutar Codex. Conserva tus archivos existentes: si hay coincidencias,
+   integra `config.toml`, `AGENTS.md` y los roles correspondientes a mano.
+   Estos comandos copian solo los archivos que no existen:
+
+   ```bash
+   codex_dir=${CODEX_HOME:-"$HOME/.codex"}
+   mkdir -p "$codex_dir/agents" &&
+   for src in codex/config.toml codex/AGENTS.md codex/agents/*.toml; do
+     dest="$codex_dir/${src#codex/}"
+     if [ -e "$dest" ] || [ -L "$dest" ]; then
+       printf 'Conservado: %s\n' "$dest"
+     else
+       (set -C; cat < "$src" > "$dest") || break
+     fi
+   done
+   ```
+
+2. [Instala las skills compartidas](#instalar-las-skills-compartidas).
+3. Inicia sesión con ChatGPT y abre Codex desde tu proyecto:
+
+   ```bash
+   codex login
+   codex login status
+   codex --strict-config
+   ```
+
+   Si ya iniciaste sesión con ChatGPT en ese perfil, no necesitas repetir el
+   login. En Codex, `/status` muestra el modelo y los permisos de la sesión;
+   `/skills` muestra las skills disponibles y `/mcp`, las herramientas MCP.
+
+La sesión principal, `/plan` y `reviewer` usan **Sol High**; `explore` y
+`general` usan **Sol Medium**. Los subagentes heredan el sandbox y la política
+de aprobación de la sesión. Para una revisión sin escrituras, usa una sesión
+con `codex --sandbox read-only --ask-for-approval never` y sin MCP activos.
+
+**MCP opcional:** Context7 viene desactivado. Para usarlo, cambia `enabled` a
+`true` en la sección `[mcp_servers.context7]` de tu `config.toml` instalado,
+ejecuta `codex mcp login context7` y comprueba la conexión con `codex mcp list`.
+Esta configuración no incluye Plane ni Gitea.
+
+## Instalar las skills compartidas
+
+Ambos clientes leen `~/.agents/skills/`. Instálalas una sola vez. Los comandos
+copian cada directorio completo, incluidos sus archivos de apoyo, sin
+sobrescribir skills instaladas. Si ya tienes una skill con el mismo nombre,
+revisa las diferencias antes de actualizarla.
 
 ```bash
-codex_pilot() {
-  case "${codex_home:-}" in
-    "$HOME"/.codex-flow.??????) ;;
-    *) printf '%s\n' 'No hay un perfil de prueba preparado.' >&2; return 1 ;;
-  esac
-  if [ -L "$codex_home" ] || [ ! -f "$codex_home/config.toml" ] ||
-     [ ! -f "$codex_home/AGENTS.md" ] || [ ! -d "$codex_home/agents" ]; then
-    printf '%s\n' 'El perfil de prueba está incompleto.' >&2
-    return 1
+mkdir -p "$HOME/.agents/skills" &&
+for src in skills/*/; do
+  name=${src%/}
+  dest="$HOME/.agents/skills/${name##*/}"
+  if [ ! -e "$dest" ] && [ ! -L "$dest" ]; then
+    cp -R "$src" "$dest" || break
   fi
-  CODEX_HOME="$codex_home" codex "$@"
-}
-
-codex_home=$(mktemp -d "$HOME/.codex-flow.XXXXXX") &&
-  cp -R codex/. "$codex_home/" &&
-  codex_pilot login
+done
 ```
 
-Usa la misma cuenta y espacio de trabajo Pro previstos para la comparación.
-Las skills se leen desde `~/.agents/skills/`, al igual que en OpenCode. Si ya
-están instaladas, reutilízalas sin copiar ni reemplazar nada. Si faltan, copia
-solo las necesarias al `.agents/skills/` de un repo de prueba descartable, o
-pospón la prueba. No cambies `~/.agents/skills/` para el piloto. Las
-instrucciones de cada proyecto siguen en su propio `AGENTS.md`.
+Cada `skills/<nombre>/SKILL.md` describe cuándo usarla y qué herramientas
+necesita. Las que dependen de servicios externos, como Plane, requieren que
+configures ese servicio en el cliente que vayas a usar.
 
-Usa una **rama de tarea de un repo de prueba**, no la rama base. Elige un
-worktree sin `.codex/config.toml` en la raíz del repo ni en el camino hasta el
-directorio de trabajo: una configuración de proyecto de confianza puede
-añadir o activar MCP por encima de este perfil. Antes de abrir Codex, verifica
-la lista desde ese mismo worktree:
+## Actualizar el snapshot
 
-```bash
-worktree=/ruta/al/worktree-de-prueba
-(cd "$worktree" && codex_pilot mcp list)
-```
-
-Continúa solo si la lista no muestra servidores activos (la plantilla lista
-Context7 como `disabled`):
-
-```bash
-(cd "$worktree" && codex_pilot --strict-config)
-```
-
-1. Con `/status`, confirma Sol High y los permisos del workspace; con
-   `/skills`, comprueba que estén disponibles `git-workflow-and-versioning`,
-   `incremental-delivery` y `tdd`.
-2. Usa `/plan` para investigar y proponer un cambio pequeño; comprueba que no
-   haya ediciones. Si se delega investigación, `/subagents` permite inspeccionar
-   el hilo de `explore`.
-3. Sal de `/plan`, autoriza implementar y comprueba que el resultado pase los
-   tests acordados. Codex debe **pedir aprobación antes del commit**, no
-   hacerlo automáticamente. Al cerrar la sesión, `git status --short` y
-   `git log -1` permiten comprobar el diff y que el último commit no cambió.
-
-La sesión principal sustituye a `build` y `/plan` a `plan`, ambos con esfuerzo
-High. `general` y `explore` usan Medium; `reviewer` usa High. No se replica
-`title`. Los subagentes de Codex heredan el sandbox y las aprobaciones de la
-sesión: las instrucciones de solo lectura de `explore` y `reviewer` **no** son
-permisos técnicos. El perfil `reviewer` desactiva sus herramientas de shell y de
-solicitud de permisos; proporciónale el diff como entrada. Para impedir
-escrituras en una revisión, abre una sesión separada con
-`--sandbox read-only --ask-for-approval never` y deja los MCP desactivados.
-`/plan` no reproduce el bloqueo de shell del agente `plan` de OpenCode.
-
-La plantilla no activa ningún MCP. Si una tarea requiere Context7,
-activa `mcp_servers.context7.enabled` **solo en la copia temporal**, autentícalo
-con `(cd "$worktree" && codex_pilot mcp login context7)` y comprueba sus
-herramientas en `/mcp`. Plane y Gitea no están configurados. Los roles y
-servicios de este perfil sirven para probar el flujo habitual; en una
-comparación controlada del cliente, no uses subagentes ni MCP.
-
-Al terminar, puedes cerrar la sesión de esa instalación con
-`codex_pilot logout` y borrar el directorio temporal.
-La plantilla guarda localmente las credenciales de ChatGPT y MCP en ese perfil
-en vez de usar el llavero compartido. Nunca lo subas a Git: también puede
-contener historial.
-
-## Exclusiones explícitas (no copiar)
-
-Este snapshot es deliberadamente parcial. **Nunca** copies ni versiones:
-
-- Credenciales y estado OAuth: `auth.json`, `account.json`,
-  `credentials.json`, `~/.local/share/opencode/`, tokens de MCP.
-- `service.json` y cualquier secreto de servicio.
-- Backups (`*.bak`, `snapshot/`).
-- Bases de datos (`opencode.db`, `*.sqlite`, `*.db-wal`/`-shm`), logs y cachés.
-- El valor de `omniroute.key` y cualquier clave privada o material criptográfico.
-
-La instalación global de cada máquina sigue siendo la fuente de verdad; este
-repo es solo una copia de referencia sanitizada.
-
-## Reglas
-
-- NUNCA apuntar `OPENCODE_CONFIG` / `OPENCODE_CONFIG_DIR` a este repo.
-- NUNCA versionar secretos: solo referencias como `{file:...}`.
-- Para actualizar: copia tu `~/.config/opencode/opencode.json` a
-  `opencode.global.json` y verifica que no haya quedado ningún valor sensible.
+Versiona solo configuraciones sanitizadas e instrucciones. No copies
+`auth.json`, tokens MCP, `omniroute.key`, claves privadas, logs, bases de datos
+ni historial de sesión. Conserva referencias a credenciales (por ejemplo,
+`{file:...}`) en vez de sus valores.
